@@ -4,6 +4,8 @@ import { MapContainer, TileLayer, CircleMarker, Popup, Circle } from 'react-leaf
 import { getThemeColors } from '../theme';
 import { validLocation } from '../lib/map-utils';
 import ResizeMap from './ResizeMap';
+import ProvinceBoundaries from './ProvinceBoundaries';
+import { MAP_BACKGROUNDS, PHILIPPINES_BOUNDS } from '../lib/map-backgrounds';
 import CoordinateGrid from './CoordinateGrid';
 import CoordinateReadout from './CoordinateReadout';
 import { FitObservationView, MapScale } from './MapControls';
@@ -13,23 +15,16 @@ export default function FireMap({ records, layers, basemap, mapReference, select
   const [failedBasemap, setFailedBasemap] = useState('');
   useEffect(function resetFallback() { setFailedBasemap(''); }, [basemap]);
 
+  // Only the map background and outlines come from the supplied reference.
   let displayedBasemap = basemap;
-  if (failedBasemap === basemap && basemap === 'satellite') displayedBasemap = 'street';
-
-  let tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-  let attribution = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
-  let nativeZoom = 19;
-  if (displayedBasemap === 'satellite') {
-    tileUrl = 'https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/{z}/{y}/{x}.jpeg';
-    attribution = 'Imagery: <a href="https://earthdata.nasa.gov/gibs">NASA GIBS / Blue Marble</a>';
-    nativeZoom = 8;
-  }
+  if (!MAP_BACKGROUNDS[displayedBasemap]) displayedBasemap = 'street';
+  if (failedBasemap === basemap) displayedBasemap = 'street';
+  const background = MAP_BACKGROUNDS[displayedBasemap];
 
   function handleTileError() {
-    if (failedBasemap === basemap) return;
-    setFailedBasemap(basemap);
-    if (basemap === 'satellite') {
-      onBasemapWarning('Satellite imagery could not load. The street map is shown instead.');
+    if (displayedBasemap !== 'street') {
+      setFailedBasemap(basemap);
+      onBasemapWarning('Selected background could not load. The street map is shown instead.');
     } else {
       onBasemapWarning('Background tiles could not load. Check the connection or select another background in Layers.');
     }
@@ -46,16 +41,19 @@ export default function FireMap({ records, layers, basemap, mapReference, select
     <div className="map-container workspace-map" data-basemap={displayedBasemap}>
       <MapContainer
         ref={mapReference}
-        center={[12.5, 122.5]}
-        zoom={5}
-        minZoom={2}
+        center={[12.5, 122.4]}
+        zoom={5.65}
+        minZoom={5}
         maxZoom={18}
-        maxBounds={[[-85, -180], [85, 180]]}
+        maxBounds={PHILIPPINES_BOUNDS}
         maxBoundsViscosity={1}
+        zoomSnap={0.25}
+        preferCanvas={true}
         style={{ height: '100%', width: '100%' }}
         scrollWheelZoom={true}
       >
-        <TileLayer key={displayedBasemap} url={tileUrl} attribution={attribution} maxNativeZoom={nativeZoom} maxZoom={18} noWrap={true} eventHandlers={{ tileerror: handleTileError }} />
+        <TileLayer key={displayedBasemap} {...background} maxZoom={18} noWrap={true} eventHandlers={{ tileerror: handleTileError }} />
+        <ProvinceBoundaries enabled={layers.boundaries !== false} />
         <ResizeMap />
         <FitObservationView records={records} />
         <MapScale />

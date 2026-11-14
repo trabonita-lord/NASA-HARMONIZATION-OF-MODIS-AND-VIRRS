@@ -74,18 +74,19 @@ The old Sidebar.jsx, SummaryCards.jsx, Metric.jsx, and navigation.js copies were
 
 ## Dashboard animations
 
-- SplashScreen.jsx: logo and 2-second intro timing (runs on each page refresh).
+- SplashScreen.jsx: one video intro and TANAW logo reveal on each page refresh (normally 6.3 seconds).
 - CountUpNumber.jsx: 1-second number animation; original values remain unchanged.
 - SidebarHighlight.jsx: moves the active highlight behind the direct buttons in App.jsx.
 - app.css: search DASHBOARD ANIMATIONS for entrance delays, hover, logo glow, and radar effects.
 - App.jsx: showSplash controls the intro; card numbers use CountUpNumber.
-- Reduced-motion preferences skip the intro and disable decorative motion.
+- Reduced-motion preferences skip video and show a still TANAW logo for 1.8 seconds.
 
-## Fire owl intro (reference-inspired)
+## Video splash kit
 
-- SplashScreen.jsx: intro timing and original logo path (4.6 seconds after the logo loads).
-- FireOwl.jsx: animated owl wings and the exact original PNG logo reveal.
-- FireEmbers.jsx: moving fire particles.
-- splash-screen.css: flight path, wing beats, glow, and logo transition.
-- Original image: public/assets/fire_owl.png (unchanged).
-
+- SplashScreen.jsx replaces the old flight intro and is mounted once by App.jsx.
+- splash-screen.css contains all intro styles. Shared dashboard animations stay in app.css.
+- public/assets/tanaw-intro.mp4 is the supplied video; public/assets/fire_owl.png is reused unchanged.
+- Edit VIDEO_CUTOFF_SECONDS, LOGO_FALLBACK_MS, FADE_START_MS, and INTRO_FINISH_MS at the top of SplashScreen.jsx to adjust timing.
+- Video errors or blocked autoplay reveal the logo and continue automatically. Stalled playback cannot block the dashboard.
+- Timers are cleared and body scrolling restored on unmount. React StrictMode restarts playback safely.
+- No additional splash component, App state, library, or backend was added.
