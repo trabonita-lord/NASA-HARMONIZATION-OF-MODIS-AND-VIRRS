@@ -1,9 +1,3 @@
-// QUICK GUIDE
-// Search SIDEBAR to edit the logo and each button directly.
-// Search SUMMARY BOX GRID to edit the four small boxes directly.
-// Search PAGE PANELS to choose which page appears below the boxes.
-// Popup, chart, map, and calendar content stay in src/components.
-
 import React, { useEffect, useState } from 'react';
 import {
   Activity,
@@ -11,6 +5,8 @@ import {
   CalendarDays,
   GitCompareArrows,
   Database,
+  Info,
+  RefreshCcw,
 } from 'lucide-react';
 import { loadSummary, loadCalendar } from './lib/data';
 import { configured } from './lib/supabase';
@@ -266,6 +262,24 @@ export default function App() {
               onSensorChange={setSensor}
               onChangeMonth={changeMonth}
             />
+
+            <div className="page-notices">
+              {!configured && (
+                <div className="info-message">
+                  <Info size={18} /> Sample mode: add Supabase credentials to <code>.env</code>, apply the SQL migration and import the supplied NASA FIRMS CSV files for real observations.
+                </div>
+              )}
+              {error && (
+                <div className="error-message">
+                  <Info size={18} /> Database error: {error}
+                </div>
+              )}
+              {loading && (
+                <div className="loading-message">
+                  <RefreshCcw size={15} /> Loading observations…
+                </div>
+              )}
+            </div>
 
             <div className="summary-cards">
               <div className="summary-card summary-card-total">
