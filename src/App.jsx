@@ -1,324 +1,271 @@
-import React, { useEffect, useState } from 'react';
+// MAP WORKSPACE: One full-screen map, existing pages in the right-hand panel.
+// Sidebar buttons are written directly below. Appearance: workspace.css.
+// Data loading, monthly filters, date popup, chart, and intro are preserved.
+import React, { useEffect, useRef, useState } from 'react';
 import {
-  Activity,
-  MapPinned,
-  CalendarDays,
-  GitCompareArrows,
-  Database,
-  Info,
-  RefreshCcw,
+  Activity, CalendarDays, GitCompareArrows, Database, Layers,
+  PanelRightClose, PanelRightOpen, Menu, Crosshair, CircleHelp, X, RefreshCcw,
+  Satellite, ChevronRight, Maximize2, Grid2X2,
 } from 'lucide-react';
 import { loadSummary, loadCalendar } from './lib/data';
 import { configured } from './lib/supabase';
-import TopBar from './components/TopBar';
-import PageHeader from './components/PageHeader';
+import { monthRange, observationBounds } from './lib/map-utils';
+import FireMap from './components/FireMap';
+import Filters from './components/Filters';
+import LayersPanel from './components/LayersPanel';
 import OverviewPage from './components/OverviewPage';
 import MapPage from './components/MapPage';
 import CalendarPage from './components/CalendarPage';
 import ComparisonPage from './components/ComparisonPage';
 import SourcesPage from './components/SourcesPage';
-import Footer from './components/Footer';
 import DatePopup from './components/DatePopup';
 import SplashScreen from './components/SplashScreen';
 import CountUpNumber from './components/CountUpNumber';
-import SidebarHighlight from './components/SidebarHighlight';
+import './workspace.css';
 
 export default function App() {
-  // 1. SELECTIONS AND DATA
+  // 1. EXISTING SELECTIONS AND DATA
   const [showSplash, setShowSplash] = useState(true);
+  const [showPopup, setShowPopup] = useState(true);
   const [page, setPage] = useState('overview');
   const [month, setMonth] = useState('2026-11');
   const [sensor, setSensor] = useState('');
   const [records, setRecords] = useState([]);
   const [counts, setCounts] = useState({});
   const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedDate, setSelectedDate] = useState(null);
+  const [reloadKey, setReloadKey] = useState(0);
 
-  // 2. DATE RANGE FOR THE SELECTED MONTH
-  const monthParts = month.split('-');
-  const year = Number(monthParts[0]);
-  const monthNumber = Number(monthParts[1]);
-  const startDate = month + '-01';
-  const lastDay = new Date(Date.UTC(year, monthNumber, 0));
-  const endDate = lastDay.toISOString().slice(0, 10);
+  // 2. NEW PRESENTATION CONTROLS: These never change the stored data.
+  const [panelOpen, setPanelOpen] = useState(true);
+  const [navigationOpen, setNavigationOpen] = useState(true);
+  const [basemap, setBasemap] = useState('satellite');
+  const [layers, setLayers] = useState({ modis: true, viirs: true, grid: false, coordinates: true });
+  const [selectedLocation, setSelectedLocation] = useState(null);
+  const [mapWarning, setMapWarning] = useState('');
+  const mapReference = useRef(null);
 
-  // Close the date popup when the page or filters change.
-  useEffect(() => {
+  const period = monthRange(month);
+  const startDate = period.start;
+  const endDate = period.end;
+
+  useEffect(function closeOldDatePopup() {
     setSelectedDate(null);
   }, [month, sensor, page]);
 
-  // 3. DATA LOADING
-  useEffect(() => {
+  useEffect(function loadSelectedPeriod() {
     let isCurrentRequest = true;
 
     async function loadData() {
       setLoading(true);
       setError('');
-
       try {
         const results = await Promise.all([
           loadSummary(startDate, endDate, sensor),
           loadCalendar(startDate, endDate, sensor),
         ]);
-
         if (isCurrentRequest) {
-          const summary = results[0];
-          const dailyCounts = results[1];
-          setRecords(summary.records);
-          setTotal(summary.count);
-          setCounts(dailyCounts);
+          setRecords(results[0].records);
+          setTotal(results[0].count);
+          setCounts(results[1]);
         }
       } catch (requestError) {
-        if (isCurrentRequest) {
-          setError(requestError.message);
-        }
+        if (isCurrentRequest) setError(requestError.message);
       } finally {
-        if (isCurrentRequest) {
-          setLoading(false);
-        }
+        if (isCurrentRequest) setLoading(false);
       }
     }
 
     loadData();
+    return function ignoreOldResponse() { isCurrentRequest = false; };
+  }, [startDate, endDate, sensor, reloadKey]);
 
-    return () => {
-      isCurrentRequest = false;
-    };
-  }, [startDate, endDate, sensor]);
-
-  // 4. NUMBERS FOR THE SMALL BOXES
+  // 3. EXISTING SUMMARY VALUES: Sensor toggles affect the map, not these counts.
   let modis = 0;
   let viirs = 0;
   let days = 0;
-
-  for (const observation of records) {
-    if (observation.sensor === 'MODIS') {
-      modis += 1;
-    }
-    if (observation.sensor === 'VIIRS') {
-      viirs += 1;
-    }
+  for (const record of records) {
+    if (record.sensor === 'MODIS') modis = modis + 1;
+    if (record.sensor === 'VIIRS') viirs = viirs + 1;
   }
-
   for (const date in counts) {
-    if (counts[date] > 0) {
-      days += 1;
+    if (counts[date] > 0) days = days + 1;
+  }
+
+  // 4. SIDEBAR / TOOLBAR ACTIONS
+  function openPage(nextPage) {
+    setPage(nextPage);
+    setPanelOpen(true);
+  }
+  function closeDatePopup() { setSelectedDate(null); }
+  function closeWelcomePopup() { setShowPopup(false); }
+  function retryLoading() { setReloadKey(previous => previous + 1); }
+
+  function changeMonth(value) {
+    // Clearing a month input must never create an invalid date or crash the app.
+    if (monthRange(value)) setMonth(value);
+  }
+  function shiftMonth(amount) {
+    const year = Number(month.slice(0, 4));
+    const number = Number(month.slice(5, 7));
+    const nextMonth = new Date(Date.UTC(year, number - 1 + amount, 1));
+    changeMonth(nextMonth.toISOString().slice(0, 7));
+  }
+  function changeLayer(name, checked) {
+    setLayers(previous => ({ ...previous, [name]: checked }));
+  }
+  function changeBasemap(value) {
+    setBasemap(value);
+    setMapWarning('');
+  }
+  function locateCoordinate(latitude, longitude) {
+    setSelectedLocation([latitude, longitude]);
+    if (mapReference.current) mapReference.current.setView([latitude, longitude], 9);
+  }
+  function fitObservations() {
+    const map = mapReference.current;
+    if (!map) return;
+    const bounds = observationBounds(records);
+    if (bounds) {
+      let rightPadding = 35;
+      if (panelOpen && map.getSize().x > 1000) rightPadding = 420;
+      map.fitBounds(bounds, { paddingTopLeft: [90, 60], paddingBottomRight: [rightPadding, 85], maxZoom: 8 });
+    } else {
+      map.setView([12.5, 122.5], 5);
     }
   }
-
-  // 5. SIDEBAR BUTTON ACTIONS
-  function openOverview() { setPage('overview'); }
-  function openMap() { setPage('map'); }
-  function openCalendar() { setPage('calendar'); }
-  function openComparison() { setPage('compare'); }
-  function openSources() { setPage('sources'); }
-
-  function getButtonClass(buttonPage) {
-    return page === buttonPage ? 'sidebar-button sidebar-button-active' : 'sidebar-button';
+  function railClass(name) {
+    if (page === name && panelOpen) return 'rail-button rail-button-active';
+    return 'rail-button';
+  }
+  function handleWelcomeKey(event) {
+    if (event.key === 'Escape') closeWelcomePopup();
   }
 
-  function closeDatePopup() {
-    setSelectedDate(null);
-  }
-
-  function changeMonth(numberOfMonths) {
-    const nextMonth = new Date(Date.UTC(year, monthNumber - 1 + numberOfMonths, 1));
-    setMonth(nextMonth.toISOString().slice(0, 7));
-  }
-
-  // 6. CHOOSE THE PAGE CONTENT
-  let pageTitle = '';
-  let pageContent = null;
-
-  if (page === 'overview') {
-    pageTitle = 'Overview';
-    pageContent = <OverviewPage records={records} />;
-  }
-  if (page === 'map') {
-    pageTitle = 'Fire hotspot map';
-    pageContent = <MapPage records={records} />;
-  }
-  if (page === 'calendar') {
-    pageTitle = 'Activity calendar';
-    pageContent = (
-      <CalendarPage
-        month={month}
-        counts={counts}
-        onSelectDate={setSelectedDate}
-      />
-    );
-  }
-  if (page === 'compare') {
-    pageTitle = 'Sensor comparison';
-    pageContent = <ComparisonPage modis={modis} viirs={viirs} />;
-  }
-  if (page === 'sources') {
-    pageTitle = 'Data & methodology';
-    pageContent = <SourcesPage />;
-  }
-
-  const hasMessages = !configured || Boolean(error) || loading;
-  let contentClass = 'page-content';
-  if (hasMessages) {
-    contentClass = 'page-content page-content-with-notices';
-  }
-
-  const popupContent = selectedDate ? (
-    <DatePopup date={selectedDate} onClose={closeDatePopup} />
-  ) : null;
-
-  const dashboardClass = showSplash ? 'app-layout dashboard-waiting' : 'app-layout dashboard-ready';
+  const titles = {
+    overview: 'Overview', map: 'Fires & layers', calendar: 'Activity calendar',
+    compare: 'Sensor comparison', sources: 'Data & methodology', help: 'Workspace guide',
+  };
+  const welcomePopupVisible = showPopup && !showSplash && !loading;
   const animateNumbers = !showSplash && !loading;
+  let workspaceClass = 'firms-workspace dashboard-ready';
+  if (showSplash) workspaceClass = 'firms-workspace dashboard-waiting';
 
-  // 8. VISIBLE LAYOUT
+  // 5. VISIBLE WORKSPACE: The map is never unmounted when changing pages.
   return (
     <>
       {showSplash && <SplashScreen onFinish={setShowSplash} />}
-      <div className={dashboardClass} inert={showSplash}>
-        <div className="sidebar">
-          <div className="sidebar-logo">
-            <img src="/assets/tanaw-owl-flame.png" alt="TANAW logo" />
-            <div>
-              <small>THERMAL ACTIVITY WATCH</small>
-            </div>
-          </div>
-
-          <div className="sidebar-caption">OBSERVATORY / PH</div>
-
-          <nav aria-label="Main navigation">
-            <SidebarHighlight page={page} />
-
-            <button
-              type="button"
-              className={getButtonClass('overview')}
-              onClick={openOverview}
-            >
-              <Activity size={17} />
-              <span>Overview</span>
-              <small>01</small>
-            </button>
-
-            <button
-              type="button"
-              className={getButtonClass('map')}
-              onClick={openMap}
-            >
-              <MapPinned size={17} />
-              <span>Fire hotspot map</span>
-              <small>02</small>
-            </button>
-
-            <button
-              type="button"
-              className={getButtonClass('calendar')}
-              onClick={openCalendar}
-            >
-              <CalendarDays size={17} />
-              <span>Activity calendar</span>
-              <small>03</small>
-            </button>
-
-            <button
-              type="button"
-              className={getButtonClass('compare')}
-              onClick={openComparison}
-            >
-              <GitCompareArrows size={17} />
-              <span>Sensor comparison</span>
-              <small>04</small>
-            </button>
-
-            <button
-              type="button"
-              className={getButtonClass('sources')}
-              onClick={openSources}
-            >
-              <Database size={17} />
-              <span>Data &amp; methodology</span>
-              <small>05</small>
-            </button>
-          </nav>
-
-          <div className="sidebar-profile">
-            <img src="/assets/fire_owl.png" alt="Profile picture" className="sidebar-avatar" />
-            <div>
-              <b>TANAW Research</b>
-              <small>NASA Space Apps / Prototype</small>
-            </div>
+      {welcomePopupVisible && (
+        <div className="popup" role="dialog" aria-modal="true" aria-labelledby="welcome-popup-title" onKeyDown={handleWelcomeKey}>
+          <div className="popup-content">
+            <div className="section-caption">YOUR OBSERVATION WORKSPACE</div>
+            <h1 id="welcome-popup-title">Welcome to TANAW</h1>
+            <p>Explore MODIS and VIIRS observations on the full-screen map. Open your existing pages from the sidebar, or use Layers to show coordinates and control sensor visibility.</p>
+            <button type="button" onClick={closeWelcomePopup} autoFocus>Explore the map <ChevronRight size={16} /></button>
           </div>
         </div>
+      )}
 
-        <main>
-          <TopBar title={pageTitle} configured={configured} />
-
-          <div className={contentClass}>
-            <PageHeader
-              title={pageTitle}
-              month={month}
-              sensor={sensor}
-              onMonthChange={setMonth}
-              onSensorChange={setSensor}
-              onChangeMonth={changeMonth}
-            />
-
-            <div className="page-notices">
-              {!configured && (
-                <div className="info-message">
-                  <Info size={18} /> Sample mode: add Supabase credentials to <code>.env</code>, apply the SQL migration and import the supplied NASA FIRMS CSV files for real observations.
-                </div>
-              )}
-              {error && (
-                <div className="error-message">
-                  <Info size={18} /> Database error: {error}
-                </div>
-              )}
-              {loading && (
-                <div className="loading-message">
-                  <RefreshCcw size={15} /> Loading observations…
-                </div>
-              )}
-            </div>
-
-            <div className="summary-cards">
-              <div className="summary-card summary-card-total">
-                <span>OBSERVATIONS IN PERIOD</span>
-                <strong>
-                  <CountUpNumber value={total} enabled={animateNumbers} delay={100} />
-                </strong>
-                <small>Raw satellite detections</small>
-              </div>
-
-              <div className="summary-card summary-card-modis">
-                <span>MODIS (DISPLAYED)</span>
-                <strong>
-                  <CountUpNumber value={modis} enabled={animateNumbers} delay={200} />
-                </strong>
-                <small>Up to 1,500 rows fetched</small>
-              </div>
-
-              <div className="summary-card summary-card-viirs">
-                <span>VIIRS (DISPLAYED)</span>
-                <strong>
-                  <CountUpNumber value={viirs} enabled={animateNumbers} delay={300} />
-                </strong>
-                <small>Up to 1,500 rows fetched</small>
-              </div>
-
-              <div className="summary-card summary-card-days">
-                <span>ACTIVE DAYS</span>
-                <strong>{days}</strong>
-                <small>Days with one or more observations</small>
-              </div>
-            </div>
-
-            <div className="page-sections">{pageContent}</div>
-            <Footer />
+      <div className={workspaceClass} inert={showSplash || welcomePopupVisible}>
+        {/* HEADER: TANAW branding, not an official NASA product banner. */}
+        <header className="workspace-topbar">
+          <button className="header-icon-button" type="button" aria-label="Toggle navigation" aria-expanded={navigationOpen} onClick={() => setNavigationOpen(!navigationOpen)}><Menu size={23} /></button>
+          <div className="workspace-brand">
+            <img src="/assets/fire_owl.png" alt="TANAW owl" />
+            <div><b>TANAW</b><span>Thermal Activity Watch</span></div>
           </div>
-          {popupContent}
+          <div className="workspace-header-divider" />
+          <span className="workspace-header-caption">EARTH OBSERVATION / PHILIPPINES</span>
+          <div className="workspace-header-actions">
+            <span className="workspace-data-status"><i />{configured ? 'DATABASE CONNECTED' : 'SAMPLE MODE'}</span>
+            <button type="button" className="header-text-button" onClick={() => openPage('map')}><Layers size={18} /><span>Layers</span></button>
+            <button type="button" className="header-icon-button" aria-label="Open workspace guide" onClick={() => openPage('help')}><CircleHelp size={21} /></button>
+          </div>
+        </header>
+
+        <main className="map-workspace" aria-label="Thermal activity map workspace">
+          {/* FULL-SCREEN MAP: One instance shared by every panel. */}
+          <FireMap records={records} layers={layers} basemap={basemap} mapReference={mapReference} selectedLocation={selectedLocation} onBasemapWarning={setMapWarning} />
+
+          {/* SIDEBAR: Existing pages remain available as direct buttons. */}
+          {navigationOpen && (
+            <nav className="workspace-rail" aria-label="Workspace pages">
+              <button type="button" className={railClass('overview')} aria-pressed={page === 'overview' && panelOpen} title="Overview" onClick={() => openPage('overview')}><Activity size={22} /><span>Overview</span></button>
+              <button type="button" className={railClass('map')} aria-pressed={page === 'map' && panelOpen} title="Fire hotspot map and layers" onClick={() => openPage('map')}><Layers size={22} /><span>Layers</span></button>
+              <button type="button" className={railClass('calendar')} aria-pressed={page === 'calendar' && panelOpen} title="Activity calendar" onClick={() => openPage('calendar')}><CalendarDays size={22} /><span>Calendar</span></button>
+              <button type="button" className={railClass('compare')} aria-pressed={page === 'compare' && panelOpen} title="Sensor comparison" onClick={() => openPage('compare')}><GitCompareArrows size={22} /><span>Compare</span></button>
+              <button type="button" className={railClass('sources')} aria-pressed={page === 'sources' && panelOpen} title="Data and methodology" onClick={() => openPage('sources')}><Database size={22} /><span>Sources</span></button>
+              <div className="rail-separator" />
+              <button type="button" className="rail-button" title="Fit observations" onClick={fitObservations}><Crosshair size={22} /><span>Fit view</span></button>
+            </nav>
+          )}
+
+          {/* MAP STATUS: Clearly distinguish sample data, errors, and hidden layers. */}
+          <div className="map-period-chip"><Satellite size={14} /><span>OBSERVATIONS <b>{month}</b> · {sensor || 'All sensors'}</span>{loading && <RefreshCcw size={13} className="loading-spinner" />}</div>
+          {error && <div className="workspace-error" role="alert"><span>Observations could not load: {error}</span><button type="button" onClick={retryLoading}>Retry</button></div>}
+          {mapWarning && <div className="workspace-warning" role="status"><span>{mapWarning}</span><button type="button" aria-label="Dismiss map notice" onClick={() => setMapWarning('')}><X size={15} /></button></div>}
+          {!layers.modis && !layers.viirs && <div className="map-empty-layer-note">Sensor layers are hidden. Turn them on in Layers.</div>}
+
+          {/* RIGHT PANEL: Same features, placed above the map like the reference. */}
+          {panelOpen ? (
+            <aside className="workspace-panel" aria-label={titles[page]}>
+              <div className="workspace-panel-header">
+                <div><span className="section-caption">TANAW WORKSPACE</span><h1>{titles[page]}</h1></div>
+                <button type="button" className="panel-close-button" aria-label="Close side panel" onClick={() => setPanelOpen(false)}><PanelRightClose size={21} /></button>
+              </div>
+              <div className="workspace-panel-scroll">
+                {/* PERIOD FILTERS: Existing month arrows, month picker, and sensor filter. */}
+                <section className="panel-period">
+                  <div className="panel-section-label">OBSERVATION PERIOD <span>UTC</span></div>
+                  <Filters month={month} sensor={sensor} onMonthChange={changeMonth} onSensorChange={setSensor} onChangeMonth={shiftMonth} />
+                </section>
+
+                {/* SUMMARY BOX GRID: Same four values and count-up animations. */}
+                <div className="summary-cards workspace-summary">
+                  <div className="summary-card summary-card-total"><span>OBSERVATIONS</span><strong><CountUpNumber value={total} enabled={animateNumbers} /></strong><small>Selected period</small></div>
+                  <div className="summary-card summary-card-modis"><span>MODIS</span><strong><CountUpNumber value={modis} enabled={animateNumbers} delay={100} /></strong><small>Displayed sample</small></div>
+                  <div className="summary-card summary-card-viirs"><span>VIIRS</span><strong><CountUpNumber value={viirs} enabled={animateNumbers} delay={200} /></strong><small>Displayed sample</small></div>
+                  <div className="summary-card summary-card-days"><span>ACTIVE DAYS</span><strong>{days}</strong><small>With observations</small></div>
+                </div>
+
+                <div className="workspace-page-content">
+                  {page === 'overview' && <OverviewPage onOpenLayers={() => openPage('map')} />}
+                  {page === 'map' && <><MapPage /><LayersPanel layers={layers} onChangeLayer={changeLayer} basemap={basemap} onChangeBasemap={changeBasemap} onLocate={locateCoordinate} modis={modis} viirs={viirs} /></>}
+                  {page === 'calendar' && <CalendarPage month={month} counts={counts} onSelectDate={setSelectedDate} />}
+                  {page === 'compare' && <ComparisonPage modis={modis} viirs={viirs} />}
+                  {page === 'sources' && <SourcesPage />}
+                  {page === 'help' && (
+                    <section className="workspace-help">
+                      <h2>Explore the workspace</h2>
+                      <p><b>Map:</b> drag to pan, scroll or use + / − to zoom. Click a colored observation for its details.</p>
+                      <p><b>Layers:</b> toggle sensors, background imagery, the coordinate readout, or the latitude/longitude grid.</p>
+                      <p><b>Calendar:</b> choose a date to open your existing pie-chart and table popup.</p>
+                      <p><b>Fit view:</b> center all fetched observations. Close this panel for an unobstructed map.</p>
+                      <p>Counts describe satellite observations, not unique fires. Blue Marble is a static background; it is not the selected month's fire data.</p>
+                    </section>
+                  )}
+                </div>
+                <div className="workspace-panel-footer">NASA FIRMS source data · TANAW prototype<br />Not an operational emergency warning service.</div>
+              </div>
+            </aside>
+          ) : (
+            <button type="button" className="reopen-panel-button" onClick={() => setPanelOpen(true)}><PanelRightOpen size={18} /> Open panel</button>
+          )}
+
+          {/* BOTTOM TOOLBAR: Every visible tool has a working action. */}
+          <div className="workspace-toolbar" role="toolbar" aria-label="Map tools">
+            <button type="button" onClick={() => openPage('map')}><Layers size={21} /><span>Layers</span></button>
+            <button type="button" onClick={() => changeLayer('grid', !layers.grid)} aria-pressed={layers.grid}><Grid2X2 size={21} /><span>Lat / Lon</span></button>
+            <button type="button" onClick={() => openPage('calendar')}><CalendarDays size={21} /><span>Calendar</span></button>
+            <button type="button" onClick={fitObservations}><Crosshair size={21} /><span>Fit view</span></button>
+            <button type="button" onClick={() => setPanelOpen(!panelOpen)} aria-pressed={!panelOpen}><Maximize2 size={21} /><span>{panelOpen ? 'Full map' : 'Panel'}</span></button>
+          </div>
+          <div className="map-sensor-legend" aria-label="Map sensor colors"><span><i className="modis-swatch" />MODIS</span><span><i className="viirs-swatch" />VIIRS</span></div>
         </main>
       </div>
+      {selectedDate && <DatePopup date={selectedDate} onClose={closeDatePopup} />}
     </>
   );
 }
