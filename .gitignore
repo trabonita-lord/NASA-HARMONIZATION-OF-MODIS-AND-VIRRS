@@ -8,3 +8,5 @@ dist/
 *.log
 *.zip
 .DS_Store
+
+/Microsoft/
