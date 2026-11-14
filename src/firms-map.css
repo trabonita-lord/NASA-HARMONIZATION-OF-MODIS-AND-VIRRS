@@ -1,2 +1,430 @@
 /* FIRMS-inspired operational map layout: imagery, direct time controls, and a compact layer console. */
-.firms-map{height:590px;background:#dbe1dd;border-color:#697773;border-radius:3px}.firms-map .leaflet-container{background:#dae0dc}.firms-map .leaflet-control-zoom{margin-top:91px!important}.firms-map .leaflet-control-zoom a{background:#fff!important;color:#394742!important;border-color:#c7ceca!important}.firms-map .leaflet-control-attribution{background:#ffffffd9!important;color:#414b48!important}.firms-map .leaflet-control-attribution a{color:#526e62!important}.firms-map .map-toolbar{top:12px;left:12px;right:auto;justify-content:flex-start;gap:7px}.firms-search{height:37px;width:270px;background:#fff;box-shadow:0 1px 5px #17221e30;border:1px solid #bac4bf;border-radius:2px;display:flex;align-items:center;padding:0 9px;gap:8px;color:#47544e}.firms-search>span{font-size:20px}.firms-search input{border:0;outline:0;width:100%;color:#27342f;background:transparent;font-size:11px}.firms-search input::placeholder{color:#717d76}.scope-chip{border:0;border-left:1px solid #d4dad6;padding:0 4px 0 10px;background:none;color:#53645c;font:10px var(--mono)}.map-fit{height:37px;background:#fff;color:#44524b;border-color:#bac4bf;box-shadow:0 1px 5px #17221e30}.firms-period{position:absolute;z-index:500;top:12px;right:12px;background:#fff;border:1px solid #bdc7c1;box-shadow:0 1px 5px #17221e30;color:#394641;width:176px;padding:9px;border-radius:2px}.period-tabs,.period-presets{display:flex;gap:4px}.period-tabs button,.period-presets button{flex:1;border:0;background:#eef1ef;padding:7px 3px;color:#65716b;font:9px var(--mono);letter-spacing:.04em}.period-tabs button.selected,.period-presets button.selected{background:#485a50;color:white}.period-presets{margin-top:8px}.period-presets button{font-size:8px;background:#f5f6f5;border:1px solid #d7ddda}.period-presets button.selected{background:#6c7f74;color:#fff;border-color:#6c7f74}.period-date{font:10px var(--mono);padding:10px 2px 1px;color:#53635b}.period-date span{float:right}.firms-map-tools{position:absolute;z-index:500;bottom:12px;left:50%;transform:translateX(-50%);display:flex;align-items:center;background:#fff;border:1px solid #b9c3bd;box-shadow:0 2px 8px #15221d35;border-radius:2px;padding:4px}.firms-map-tools button{min-width:55px;height:47px;background:#fff;border:0;border-right:1px solid #e1e5e2;color:#52615a;font:16px var(--sans);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2px}.firms-map-tools button:last-child{border:0}.firms-map-tools button span{font:8px var(--mono);letter-spacing:.04em}.firms-map-tools button:hover,.firms-map-tools button.selected{color:#1f3329;background:#edf1ed}.firms-scale{position:absolute;z-index:450;bottom:66px;left:14px;color:#fff;text-shadow:0 1px 3px #000,0 0 4px #000;font:9px var(--mono)}.firms-layer-card{background:#f5f6f4;border-color:#bcc6c0;border-radius:2px;padding:0;color:#34423c}.firms-layer-card .card-title{background:#e4e9e5;padding:12px 13px;margin:0;border-bottom:1px solid #cbd3ce}.firms-layer-card .card-title h3{font:600 11px var(--mono);letter-spacing:.06em;color:#37463f}.firms-mode{display:flex;padding:10px 12px 0;gap:6px}.firms-mode button{flex:1;background:#edf0ed;border:1px solid #d0d7d2;color:#6a756f;padding:7px 3px;font:9px var(--mono)}.firms-mode button.selected{background:#4d6055;border-color:#4d6055;color:#fff}.firms-layer-card .filter-group{margin:0 12px;padding:12px 0;border-top:1px solid #d5dbd7}.firms-layer-card .filter-group label{color:#5e6b64;font-size:9px;letter-spacing:.06em}.layer-source{display:flex;justify-content:space-between;align-items:center;padding:8px 3px;border-top:1px solid #e0e4e1}.layer-name{display:grid;grid-template-columns:15px auto;align-items:center;column-gap:6px}.layer-name .sensor-mark{grid-row:span 2}.layer-name b{font-size:11px;color:#3e4d45}.layer-name small{grid-column:2;color:#78847c;font-size:9px;margin-top:3px}.layer-sub{color:#758078;font-size:9px;padding:8px 3px}.layer-sub span{float:right;color:#4d5e54;font-family:var(--mono)}.firms-layer-card .switchline{font-size:10px;color:#505e56;margin:6px 0}.firms-layer-card .switch{border-color:#abb6ae;background:#dce2dd}.firms-layer-card .switch.on{background:#52675a;border-color:#52675a}.firms-layer-card .switch:after{background:#fff}.basemap-options{display:flex;gap:6px}.basemap-options button{background:#fff;border:1px solid #cbd4ce;color:#69766e;padding:8px 10px;font:9px var(--mono)}.basemap-options button.selected{border-color:#596f60;color:#31483a;background:#e7ede8}.firms-layer-card .select{background:#fff;color:#526158;border-color:#cbd4ce;padding:5px 7px}.firms-disclaimer{margin:0 12px 12px;border-left:2px solid #c28c42;background:#eee9de;padding:9px;color:#716449;font:9px/1.6 var(--mono)}.firms-map .pin.mod{background:#ffd24a;box-shadow:0 0 0 2px #262b20,0 0 0 4px #ffffffd9}.firms-map .pin.vir{background:#f25232;outline:1px solid #fff;outline-offset:1px;box-shadow:0 0 0 2px #242923}.firms-map .leaflet-tooltip{color:#f1f3ef}.firms-layer-card .sensor-mark.modis{background:#e0a32e}.firms-layer-card .sensor-mark.viirs{background:#e75c40}.firms-map-tools button:focus-visible,.firms-period button:focus-visible,.firms-layer-card button:focus-visible{outline:2px solid #c0873e;outline-offset:1px}@media(max-width:760px){.firms-map{height:480px}.firms-period{top:58px;right:8px;width:145px;padding:6px}.period-tabs button,.period-presets button{padding:6px 2px;font-size:8px}.firms-search{width:min(235px,calc(100vw - 152px))}.firms-map-tools{left:8px;right:8px;transform:none;justify-content:space-around}.firms-map-tools button{min-width:0;flex:1}.firms-scale{bottom:68px}.firms-layer-card{grid-column:1/-1}}
+.firms-map {
+    height: 590px;
+    background: #dbe1dd;
+    border-color: #697773;
+    border-radius: 3px
+}
+
+.firms-map .leaflet-container {
+    background: #dae0dc
+}
+
+.firms-map .leaflet-control-zoom {
+    margin-top: 91px !important
+}
+
+.firms-map .leaflet-control-zoom a {
+    background: #fff !important;
+    color: #394742 !important;
+    border-color: #c7ceca !important
+}
+
+.firms-map .leaflet-control-attribution {
+    background: #ffffffd9 !important;
+    color: #414b48 !important
+}
+
+.firms-map .leaflet-control-attribution a {
+    color: #526e62 !important
+}
+
+.firms-map .map-toolbar {
+    top: 12px;
+    left: 12px;
+    right: auto;
+    justify-content: flex-start;
+    gap: 7px
+}
+
+.firms-search {
+    height: 37px;
+    width: 270px;
+    background: #fff;
+    box-shadow: 0 1px 5px #17221e30;
+    border: 1px solid #bac4bf;
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    padding: 0 9px;
+    gap: 8px;
+    color: #47544e
+}
+
+.firms-search>span {
+    font-size: 20px
+}
+
+.firms-search input {
+    border: 0;
+    outline: 0;
+    width: 100%;
+    color: #27342f;
+    background: transparent;
+    font-size: 11px
+}
+
+.firms-search input::placeholder {
+    color: #717d76
+}
+
+.scope-chip {
+    border: 0;
+    border-left: 1px solid #d4dad6;
+    padding: 0 4px 0 10px;
+    background: none;
+    color: #53645c;
+    font: 10px var(--mono)
+}
+
+.map-fit {
+    height: 37px;
+    background: #fff;
+    color: #44524b;
+    border-color: #bac4bf;
+    box-shadow: 0 1px 5px #17221e30
+}
+
+.firms-period {
+    position: absolute;
+    z-index: 500;
+    top: 12px;
+    right: 12px;
+    background: #fff;
+    border: 1px solid #bdc7c1;
+    box-shadow: 0 1px 5px #17221e30;
+    color: #394641;
+    width: 176px;
+    padding: 9px;
+    border-radius: 2px
+}
+
+.period-tabs,
+.period-presets {
+    display: flex;
+    gap: 4px
+}
+
+.period-tabs button,
+.period-presets button {
+    flex: 1;
+    border: 0;
+    background: #eef1ef;
+    padding: 7px 3px;
+    color: #65716b;
+    font: 9px var(--mono);
+    letter-spacing: .04em
+}
+
+.period-tabs button.selected,
+.period-presets button.selected {
+    background: #485a50;
+    color: white
+}
+
+.period-presets {
+    margin-top: 8px
+}
+
+.period-presets button {
+    font-size: 8px;
+    background: #f5f6f5;
+    border: 1px solid #d7ddda
+}
+
+.period-presets button.selected {
+    background: #6c7f74;
+    color: #fff;
+    border-color: #6c7f74
+}
+
+.period-date {
+    font: 10px var(--mono);
+    padding: 10px 2px 1px;
+    color: #53635b
+}
+
+.period-date span {
+    float: right
+}
+
+.firms-map-tools {
+    position: absolute;
+    z-index: 500;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    background: #fff;
+    border: 1px solid #b9c3bd;
+    box-shadow: 0 2px 8px #15221d35;
+    border-radius: 2px;
+    padding: 4px
+}
+
+.firms-map-tools button {
+    min-width: 55px;
+    height: 47px;
+    background: #fff;
+    border: 0;
+    border-right: 1px solid #e1e5e2;
+    color: #52615a;
+    font: 16px var(--sans);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 2px
+}
+
+.firms-map-tools button:last-child {
+    border: 0
+}
+
+.firms-map-tools button span {
+    font: 8px var(--mono);
+    letter-spacing: .04em
+}
+
+.firms-map-tools button:hover,
+.firms-map-tools button.selected {
+    color: #1f3329;
+    background: #edf1ed
+}
+
+.firms-scale {
+    position: absolute;
+    z-index: 450;
+    bottom: 66px;
+    left: 14px;
+    color: #fff;
+    text-shadow: 0 1px 3px #000, 0 0 4px #000;
+    font: 9px var(--mono)
+}
+
+.firms-layer-card {
+    background: #f5f6f4;
+    border-color: #bcc6c0;
+    border-radius: 2px;
+    padding: 0;
+    color: #34423c
+}
+
+.firms-layer-card .card-title {
+    background: #e4e9e5;
+    padding: 12px 13px;
+    margin: 0;
+    border-bottom: 1px solid #cbd3ce
+}
+
+.firms-layer-card .card-title h3 {
+    font: 600 11px var(--mono);
+    letter-spacing: .06em;
+    color: #37463f
+}
+
+.firms-mode {
+    display: flex;
+    padding: 10px 12px 0;
+    gap: 6px
+}
+
+.firms-mode button {
+    flex: 1;
+    background: #edf0ed;
+    border: 1px solid #d0d7d2;
+    color: #6a756f;
+    padding: 7px 3px;
+    font: 9px var(--mono)
+}
+
+.firms-mode button.selected {
+    background: #4d6055;
+    border-color: #4d6055;
+    color: #fff
+}
+
+.firms-layer-card .filter-group {
+    margin: 0 12px;
+    padding: 12px 0;
+    border-top: 1px solid #d5dbd7
+}
+
+.firms-layer-card .filter-group label {
+    color: #5e6b64;
+    font-size: 9px;
+    letter-spacing: .06em
+}
+
+.layer-source {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 3px;
+    border-top: 1px solid #e0e4e1
+}
+
+.layer-name {
+    display: grid;
+    grid-template-columns: 15px auto;
+    align-items: center;
+    column-gap: 6px
+}
+
+.layer-name .sensor-mark {
+    grid-row: span 2
+}
+
+.layer-name b {
+    font-size: 11px;
+    color: #3e4d45
+}
+
+.layer-name small {
+    grid-column: 2;
+    color: #78847c;
+    font-size: 9px;
+    margin-top: 3px
+}
+
+.layer-sub {
+    color: #758078;
+    font-size: 9px;
+    padding: 8px 3px
+}
+
+.layer-sub span {
+    float: right;
+    color: #4d5e54;
+    font-family: var(--mono)
+}
+
+.firms-layer-card .switchline {
+    font-size: 10px;
+    color: #505e56;
+    margin: 6px 0
+}
+
+.firms-layer-card .switch {
+    border-color: #abb6ae;
+    background: #dce2dd
+}
+
+.firms-layer-card .switch.on {
+    background: #52675a;
+    border-color: #52675a
+}
+
+.firms-layer-card .switch:after {
+    background: #fff
+}
+
+.basemap-options {
+    display: flex;
+    gap: 6px
+}
+
+.basemap-options button {
+    background: #fff;
+    border: 1px solid #cbd4ce;
+    color: #69766e;
+    padding: 8px 10px;
+    font: 9px var(--mono)
+}
+
+.basemap-options button.selected {
+    border-color: #596f60;
+    color: #31483a;
+    background: #e7ede8
+}
+
+.firms-layer-card .select {
+    background: #fff;
+    color: #526158;
+    border-color: #cbd4ce;
+    padding: 5px 7px
+}
+
+.firms-disclaimer {
+    margin: 0 12px 12px;
+    border-left: 2px solid #c28c42;
+    background: #eee9de;
+    padding: 9px;
+    color: #716449;
+    font: 9px/1.6 var(--mono)
+}
+
+.firms-map .pin.mod {
+    background: #ffd24a;
+    box-shadow: 0 0 0 2px #262b20, 0 0 0 4px #ffffffd9
+}
+
+.firms-map .pin.vir {
+    background: #f25232;
+    outline: 1px solid #fff;
+    outline-offset: 1px;
+    box-shadow: 0 0 0 2px #242923
+}
+
+.firms-map .leaflet-tooltip {
+    color: #f1f3ef
+}
+
+.firms-layer-card .sensor-mark.modis {
+    background: #e0a32e
+}
+
+.firms-layer-card .sensor-mark.viirs {
+    background: #e75c40
+}
+
+.firms-map-tools button:focus-visible,
+.firms-period button:focus-visible,
+.firms-layer-card button:focus-visible {
+    outline: 2px solid #c0873e;
+    outline-offset: 1px
+}
+
+@media(max-width:760px) {
+    .firms-map {
+        height: 480px
+    }
+
+    .firms-period {
+        top: 58px;
+        right: 8px;
+        width: 145px;
+        padding: 6px
+    }
+
+    .period-tabs button,
+    .period-presets button {
+        padding: 6px 2px;
+        font-size: 8px
+    }
+
+    .firms-search {
+        width: min(235px, calc(100vw - 152px))
+    }
+
+    .firms-map-tools {
+        left: 8px;
+        right: 8px;
+        transform: none;
+        justify-content: space-around
+    }
+
+    .firms-map-tools button {
+        min-width: 0;
+        flex: 1
+    }
+
+    .firms-scale {
+        bottom: 68px
+    }
+
+    .firms-layer-card {
+        grid-column: 1/-1
+    }
+}
