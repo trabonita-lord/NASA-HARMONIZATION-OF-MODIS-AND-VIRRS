@@ -1,3 +1,1615 @@
+/* ==================================================
+   EDIT COLORS HERE - THERMAL COMMAND
+   Change the hex values below, save, and refresh the preview.
+   var(--name) elsewhere means: use the color with that name here.
+   ================================================== */
+:root {
+  --page-background: #0B0F19;       /* Main page and sidebar */
+  --surface-background: #151C2C;    /* Cards, panels, popup */
+  --surface-border: #26324A;        /* Thin borders */
+  --hover-background: #202A40;      /* Button hover and table headers */
+  --text-primary: #F8FAFC;          /* Headings and numbers */
+  --text-secondary: #94A3B8;        /* Subtitles and descriptions */
+  --accent-orange: #FF5722;         /* Total observations and active buttons */
+  --accent-orange-end: #FF9800;     /* End of the orange gradient */
+  --sensor-modis: #FFB74D;          /* MODIS: amber */
+  --sensor-viirs: #00E5FF;          /* VIIRS: electric cyan */
+  --active-days-color: #A855F7;     /* Active days: purple */
+}
+
+/* OTHER PALETTES: Copy these values into :root above if you prefer.
+
+   NASA / SATELLITE TELEMETRY:
+   page-background: #0F172A; surface-background: #1E293B;
+   surface-border: #334155; hover-background: #27364C;
+   text-primary: #FFFFFF; text-secondary: #CBD5E1;
+   accent-orange: #F97316; accent-orange-end: #FB923C;
+   sensor-modis: #A855F7; sensor-viirs: #38BDF8;
+
+   LIGHT OBSERVATORY (also change html color-scheme to light):
+   page-background: #F1F5F9; surface-background: #FFFFFF;
+   surface-border: #CBD5E1; hover-background: #E2E8F0;
+   text-primary: #0F172A; text-secondary: #475569;
+   accent-orange: #EA580C; accent-orange-end: #F97316;
+   sensor-modis: #9333EA; sensor-viirs: #0284C7;
+   For light maps, remove the tile filter in DARK MAP below.
+*/
+
+/* APP.CSS EDIT GUIDE
+   Use Ctrl + F to find a section number or class name.
+
+   .sidebar-button         = sidebar button
+   .filter-controls button = previous / next month button
+   .summary-cards          = grid holding the small boxes
+   .summary-card           = one small box
+   .map-container          = map height and width
+   .calendar-day           = one calendar date button
+   .date-popup             = popup size and background
+   .pie-chart-panel        = pie chart section
+   .observation-table      = popup table
+
+   width / height = element size
+   padding        = space INSIDE a box
+   margin         = space OUTSIDE a box
+   gap            = space BETWEEN grid or flex items
+   color          = text color
+   background     = background color
+
+   Rules inside @media are overrides for smaller screens.
+   Keep grid-template-areas names matched with grid-area values.
+*/
+
+/* ==================================================
+   1. PAGE DEFAULTS - page colors, fonts, and form controls
+   ================================================== */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  margin-top: 0;
+  margin-right: 0;
+  margin-bottom: 0;
+  margin-left: 0;
+  min-width: 320px;
+  background: var(--page-background);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-family: "DM Sans", "Segoe UI", sans-serif;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  font-stretch: normal;
+  line-height: normal;
+}
+
+button {
+  font: inherit;
+}
+
+input {
+  font: inherit;
+}
+
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:focus-visible {
+  outline: 2px solid var(--accent-orange);
+  outline-offset: 3px;
+}
+
+input:focus-visible {
+  outline: 2px solid var(--accent-orange);
+  outline-offset: 3px;
+}
+
+select:focus-visible {
+  outline: 2px solid var(--accent-orange);
+  outline-offset: 3px;
+}
+
+/* ==================================================
+   2. APP GRID - sidebar width and main page column
+   ================================================== */
+
+.app-layout {
+  display: grid;
+  /* 255px sidebar, followed by one flexible content column. */
+  grid-template-columns: 255px minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+/* ==================================================
+   3. SIDEBAR - logo, buttons, and profile
+   ================================================== */
+
+.sidebar {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+  padding-top: 28px;
+  padding-right: 15px;
+  padding-bottom: 28px;
+  padding-left: 15px;
+  overflow-y: auto;
+  background: #0B0F19;
+  border-right: 1px solid var(--surface-border);
+}
+
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 4px;
+  padding-right: 10px;
+  padding-bottom: 30px;
+  padding-left: 10px;
+}
+
+.sidebar-logo img {
+  flex-shrink: 0;
+  width: 200px;
+  height: 100px;
+  object-fit: contain;
+}
+
+.sidebar-logo b {
+  font-family: Manrope, "Segoe UI", sans-serif;
+  font-size: 25px;
+  font-weight: 800;
+}
+
+.sidebar-logo small {
+  display: block;
+  margin-top: 4px;
+  color: var(--text-secondary);
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  line-height: 1.5;
+}
+
+.sidebar-caption {
+  color: var(--text-secondary);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  line-height: 1.6;
+}
+
+.section-caption {
+  color: var(--text-secondary);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  line-height: 1.6;
+}
+
+.sidebar-caption {
+  padding-top: 15px;
+  padding-right: 15px;
+  padding-bottom: 15px;
+  padding-left: 15px;
+}
+
+.sidebar nav {
+  display: grid;
+  gap: 6px;
+}
+
+.sidebar-button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 46px;
+  padding-top: 14px;
+  padding-right: 12px;
+  padding-bottom: 14px;
+  padding-left: 12px;
+  border: 0;
+  border-radius: 9px;
+  background: none;
+  color: var(--text-secondary);
+  text-align: left;
+}
+
+.sidebar-button svg {
+  flex-shrink: 0;
+}
+
+.sidebar-button span {
+  flex: 1;
+  min-width: 0;
+}
+
+.sidebar-button small {
+  color: var(--text-secondary);
+  font-size: 10px;
+}
+
+.sidebar-button:hover {
+  background: var(--hover-background);
+  color: var(--text-primary);
+}
+
+.sidebar-button.sidebar-button-active {
+  background: var(--hover-background);
+  color: var(--text-primary);
+}
+
+.sidebar-button.sidebar-button-active {
+  box-shadow: inset 3px 0 var(--accent-orange);
+}
+
+.sidebar-profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 20px;
+  padding-right: 8px;
+  padding-bottom: 0;
+  padding-left: 8px;
+  border-top: 1px solid var(--surface-border);
+}
+
+.sidebar-profile small {
+  display: block;
+  margin-top: 4px;
+  color: var(--text-secondary);
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+.sidebar-avatar {
+  display: grid;
+  align-items: center;
+  justify-items: center;
+  flex-shrink: 0;
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  font-weight: 800;
+}
+
+/* ==================================================
+   4. TOP BAR - workspace title and connection status
+   ================================================== */
+
+main {
+  min-width: 0;
+}
+
+.workspace-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 70px;
+  padding-top: 16px;
+  padding-right: 32px;
+  padding-bottom: 16px;
+  padding-left: 32px;
+  border-bottom: 1px solid var(--surface-border);
+  color: var(--text-secondary);
+}
+
+.workspace-header > div {
+  min-width: 0;
+  line-height: 1.6;
+}
+
+.workspace-header > div > span {
+  margin-top: 0;
+  margin-right: 8px;
+  margin-bottom: 0;
+  margin-left: 8px;
+}
+
+.workspace-header b {
+  color: var(--text-primary);
+}
+
+.connection-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  color: var(--accent-orange);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.connection-status-dot {
+  flex-shrink: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent-orange);
+}
+
+/* ==================================================
+   5. CONTENT GRID - order and spacing of the main sections
+   ================================================== */
+
+.page-content {
+  display: grid;
+  /* One flexible column. The 0 lets it shrink to fit small screens. */
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: "heading"
+    "metrics"
+    "panels"
+    "footer";
+  gap: 24px;
+  align-content: start;
+  width: 100%;
+  max-width: 1500px;
+  margin-top: 0;
+  margin-right: auto;
+  margin-bottom: 0;
+  margin-left: auto;
+  padding-top: 32px;
+  padding-right: 32px;
+  padding-bottom: 32px;
+  padding-left: 32px;
+}
+
+.page-content-with-notices {
+  grid-template-areas: "heading"
+    "notices"
+    "metrics"
+    "panels"
+    "footer";
+}
+
+.page-content > .page-heading {
+  grid-area: heading;
+  margin-top: 0;
+  margin-right: 0;
+  margin-bottom: 0;
+  margin-left: 0;
+}
+
+.page-notices {
+  grid-area: notices;
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.page-notices > * {
+  margin-top: 0;
+  margin-right: 0;
+  margin-bottom: 0;
+  margin-left: 0;
+}
+
+.page-content > .summary-cards {
+  grid-area: metrics;
+  margin-top: 0;
+  margin-right: 0;
+  margin-bottom: 0;
+  margin-left: 0;
+}
+
+.page-sections {
+  grid-area: panels;
+  min-width: 0;
+}
+
+.page-content > footer {
+  grid-area: footer;
+  margin-top: 0;
+  margin-right: 0;
+  margin-bottom: 0;
+  margin-left: 0;
+}
+
+/* ==================================================
+   6. PAGE HEADING - title and introduction
+   ================================================== */
+
+.page-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin-bottom: 26px;
+}
+
+.page-heading > div:first-child {
+  flex: 1 1 340px;
+  min-width: 0;
+}
+
+.page-heading h1 {
+  margin-top: 10px;
+  margin-right: 0;
+  margin-bottom: 10px;
+  margin-left: 0;
+  font-family: Manrope, "Segoe UI", sans-serif;
+  /* Font grows with screen width, between 26px and 34px. */
+  font-size: clamp(26px, 2.5vw, 34px);
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.page-heading p {
+  margin-top: 8px;
+  margin-right: 0;
+  margin-bottom: 0;
+  margin-left: 0;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.page-panel p {
+  margin-top: 8px;
+  margin-right: 0;
+  margin-bottom: 0;
+  margin-left: 0;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+/* ==================================================
+   7. MONTH BUTTONS AND FILTERS - edit button size and color here
+   ================================================== */
+
+.filter-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-width: 100%;
+}
+
+.filter-controls button {
+  min-width: 0;
+  min-height: 42px;
+  padding-top: 10px;
+  padding-right: 10px;
+  padding-bottom: 10px;
+  padding-left: 10px;
+  border: 1px solid var(--surface-border);
+  border-radius: 8px;
+  background: #0B0F19;
+  color: var(--text-primary);
+}
+
+.filter-controls input {
+  min-width: 0;
+  min-height: 42px;
+  padding-top: 10px;
+  padding-right: 10px;
+  padding-bottom: 10px;
+  padding-left: 10px;
+  border: 1px solid var(--surface-border);
+  border-radius: 8px;
+  background: #0B0F19;
+  color: var(--text-primary);
+}
+
+.filter-controls select {
+  min-width: 0;
+  min-height: 42px;
+  padding-top: 10px;
+  padding-right: 10px;
+  padding-bottom: 10px;
+  padding-left: 10px;
+  border: 1px solid var(--surface-border);
+  border-radius: 8px;
+  background: #0B0F19;
+  color: var(--text-primary);
+}
+
+.filter-controls button {
+  min-width: 40px;
+}
+
+.filter-controls input {
+  width: 155px;
+}
+
+.filter-controls select {
+  width: 135px;
+}
+
+/* ==================================================
+   8. MESSAGES - information, errors, and loading
+   ================================================== */
+
+.info-message {
+  display: block;
+  margin-top: 14px;
+  margin-right: 0;
+  margin-bottom: 14px;
+  margin-left: 0;
+  padding-top: 14px;
+  padding-right: 17px;
+  padding-bottom: 14px;
+  padding-left: 17px;
+  border: 1px solid var(--surface-border);
+  border-radius: 10px;
+  background: var(--surface-background);
+  color: var(--text-primary);
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.error-message {
+  display: block;
+  margin-top: 14px;
+  margin-right: 0;
+  margin-bottom: 14px;
+  margin-left: 0;
+  padding-top: 14px;
+  padding-right: 17px;
+  padding-bottom: 14px;
+  padding-left: 17px;
+  border: 1px solid var(--surface-border);
+  border-radius: 10px;
+  background: var(--surface-background);
+  color: var(--text-primary);
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.loading-message {
+  display: block;
+  margin-top: 14px;
+  margin-right: 0;
+  margin-bottom: 14px;
+  margin-left: 0;
+  padding-top: 14px;
+  padding-right: 17px;
+  padding-bottom: 14px;
+  padding-left: 17px;
+  border: 1px solid var(--surface-border);
+  border-radius: 10px;
+  background: var(--surface-background);
+  color: var(--text-primary);
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.info-message > svg {
+  display: inline-block;
+  margin-right: 7px;
+  vertical-align: -4px;
+}
+
+.error-message > svg {
+  display: inline-block;
+  margin-right: 7px;
+  vertical-align: -4px;
+}
+
+.loading-message > svg {
+  display: inline-block;
+  margin-right: 7px;
+  vertical-align: -4px;
+}
+
+.error-message {
+  border-color: #803d37;
+  background: #3c201f;
+  color: #ffd6cf;
+}
+
+.loading-message {
+  color: var(--accent-orange);
+}
+
+code {
+  padding-top: 2px;
+  padding-right: 4px;
+  padding-bottom: 2px;
+  padding-left: 4px;
+  border-radius: 3px;
+  background: var(--surface-background);
+}
+
+/* ==================================================
+   9. SMALL BOX GRID - columns, gaps, and individual cards
+   ================================================== */
+
+.summary-cards {
+  display: grid;
+  /* Four equal columns. Change 4 to choose how many boxes fit in one row. */
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 24px;
+  margin-right: 0;
+  margin-bottom: 24px;
+  margin-left: 0;
+}
+
+.summary-card {
+  min-width: 0;
+  border: 1px solid var(--surface-border);
+  border-radius: 13px;
+  background: var(--surface-background);
+  transition: all 0.2s ease-in-out;
+}
+.summary-card:hover{
+    transform: scale(1.05);
+}
+.page-panel {
+  min-width: 0;
+  border: 1px solid var(--surface-border);
+  border-radius: 13px;
+  background: var(--surface-background);
+}
+
+.summary-card {
+  padding-top: 22px;
+  padding-right: 22px;
+  padding-bottom: 22px;
+  padding-left: 22px;
+}
+
+.summary-card span {
+  display: block;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.summary-card small {
+  display: block;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.summary-card span {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.1px;
+}
+
+.summary-card strong {
+  display: block;
+  margin-top: 12px;
+  margin-right: 0;
+  margin-bottom: 12px;
+  margin-left: 0;
+  font-family: Manrope, "Segoe UI", sans-serif;
+  /* Font grows with screen width, between 26px and 34px. */
+  font-size: clamp(26px, 2.5vw, 34px);
+  font-weight: 800;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.summary-card small {
+  font-size: 11px;
+}
+
+/* ==================================================
+   10. PANELS AND MAP - page panels and map size
+   ================================================== */
+
+.overview-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: stretch;
+  gap: 20px;
+}
+
+.page-panel {
+  padding-top: 23px;
+  padding-right: 23px;
+  padding-bottom: 23px;
+  padding-left: 23px;
+}
+
+.page-panel h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 0;
+  margin-right: 0;
+  margin-bottom: 8px;
+  margin-left: 0;
+  font-size: 17px;
+  line-height: 1.4;
+}
+
+.page-panel h2 svg {
+  flex-shrink: 0;
+}
+
+/* MAP WIDTH: 100% keeps the map panel aligned with the summary boxes and page heading.
+*/
+
+.map-panel {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.map-container {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  /* Map uses 65% of screen height, between 480px and 800px. */
+  height: clamp(480px, 65vh, 800px);
+  min-height: 480px;
+  flex: 1 0 auto;
+  margin-top: 18px;
+  overflow: hidden;
+  border-radius: 9px;
+  background: var(--surface-background);
+}
+
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  font-family: inherit;
+}
+
+/* ==================================================
+   11. CALENDAR - seven columns and date buttons
+   ================================================== */
+
+.calendar-grid {
+  display: grid;
+  /* Seven equal columns, one for each weekday. */
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 20px;
+}
+
+.calendar-weekday {
+  padding-top: 10px;
+  padding-right: 0;
+  padding-bottom: 10px;
+  padding-left: 0;
+  color: var(--text-secondary);
+  font-size: 11px;
+  text-align: center;
+}
+
+.calendar-day {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+  min-height: 70px;
+  padding-top: 8px;
+  padding-right: 8px;
+  padding-bottom: 8px;
+  padding-left: 8px;
+  border: 1px solid var(--surface-border);
+  border-radius: 6px;
+}
+
+.calendar-day span {
+  color: var(--text-primary);
+  font-size: 12px;
+}
+
+.calendar-day b {
+  color: var(--accent-orange);
+  font-size: 12px;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+/* ==================================================
+   12. SENSOR COMPARISON - labels and bars
+   ================================================== */
+
+.sensor-comparison-bars {
+  display: grid;
+  gap: 28px;
+  margin-top: 35px;
+  margin-right: 0;
+  margin-bottom: 35px;
+  margin-left: 0;
+}
+
+.sensor-comparison-label {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.sensor-comparison-track {
+  height: 18px;
+  overflow: hidden;
+  border-radius: 8px;
+  background: var(--surface-background);
+}
+
+.sensor-comparison-track > div {
+  height: 100%;
+  border-radius: inherit;
+}
+
+/* ==================================================
+   13. DATA SOURCE BOXES AND FOOTER
+   ================================================== */
+
+.data-source-cards {
+  display: grid;
+  /* Two equal columns. */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 25px;
+  margin-right: 0;
+  margin-bottom: 25px;
+  margin-left: 0;
+}
+
+.data-source-cards > div {
+  min-width: 0;
+  padding-top: 20px;
+  padding-right: 20px;
+  padding-bottom: 20px;
+  padding-left: 20px;
+  border: 1px solid var(--surface-border);
+  border-radius: 9px;
+  background: var(--surface-background);
+}
+
+.data-source-cards span {
+  display: block;
+  margin-top: 8px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+footer {
+  margin-top: 35px;
+  color: var(--text-secondary);
+  font-size: 11px;
+  line-height: 1.8;
+}
+
+/* SCREEN SIZE: These changes apply when the window is 1200px wide or smaller. */
+@media (max-width: 1200px) {
+  .app-layout {
+    /* 225px sidebar on smaller laptops. */
+    grid-template-columns: 225px minmax(0, 1fr);
+  }
+
+  .page-content {
+    padding-top: 26px;
+    padding-right: 26px;
+    padding-bottom: 26px;
+    padding-left: 26px;
+  }
+
+  .overview-grid {
+    /* One flexible column. The 0 lets it shrink to fit small screens. */
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .summary-cards {
+    /* Two equal columns. */
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* SCREEN SIZE: These changes apply when the window is 700px wide or smaller. */
+@media (max-width: 700px) {
+  .app-layout {
+    display: block;
+  }
+
+  .sidebar {
+    position: static;
+    width: 100%;
+    height: auto;
+    padding-top: 16px;
+    padding-right: 12px;
+    padding-bottom: 16px;
+    padding-left: 12px;
+    overflow: visible;
+    border-right: 0;
+    border-bottom: 1px solid var(--surface-border);
+  }
+
+  .sidebar-logo {
+    padding-top: 0;
+    padding-right: 4px;
+    padding-bottom: 16px;
+    padding-left: 4px;
+  }
+
+  .sidebar-caption {
+    display: none;
+  }
+
+  .sidebar-profile {
+    display: none;
+  }
+
+  .sidebar nav {
+    display: flex;
+    gap: 6px;
+    padding-top: 2px;
+    padding-right: 2px;
+    padding-bottom: 8px;
+    padding-left: 2px;
+    overflow-x: auto;
+  }
+
+  .sidebar-button {
+    flex: 0 0 auto;
+    width: auto;
+    padding-top: 10px;
+    padding-right: 12px;
+    padding-bottom: 10px;
+    padding-left: 12px;
+    white-space: nowrap;
+  }
+
+  .sidebar-button small {
+    display: none;
+  }
+
+  .workspace-header {
+    flex-wrap: wrap;
+    gap: 10px;
+    min-height: 58px;
+    padding-top: 12px;
+    padding-right: 16px;
+    padding-bottom: 12px;
+    padding-left: 16px;
+    font-size: 12px;
+  }
+
+  .page-content {
+    padding-top: 24px;
+    padding-right: 12px;
+    padding-bottom: 24px;
+    padding-left: 12px;
+  }
+
+  .page-heading {
+    gap: 18px;
+  }
+
+  .page-heading > div:first-child {
+    flex-basis: 100%;
+  }
+
+  .summary-cards {
+    gap: 10px;
+  }
+
+  .summary-card {
+    padding-top: 16px;
+    padding-right: 16px;
+    padding-bottom: 16px;
+    padding-left: 16px;
+  }
+
+  .summary-card strong {
+    font-size: 26px;
+  }
+
+  .page-panel {
+    padding-top: 18px;
+    padding-right: 18px;
+    padding-bottom: 18px;
+    padding-left: 18px;
+  }
+
+  .data-source-cards {
+    /* One flexible column. The 0 lets it shrink to fit small screens. */
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .map-container {
+    height: 380px;
+  }
+
+  .calendar-day {
+    min-height: 60px;
+    padding-top: 6px;
+    padding-right: 6px;
+    padding-bottom: 6px;
+    padding-left: 6px;
+  }
+
+  .calendar-grid {
+    gap: 4px;
+  }
+}
+
+/* SCREEN SIZE: These changes apply when the window is 420px wide or smaller. */
+@media (max-width: 420px) {
+  .filter-controls {
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr) 40px;
+    width: 100%;
+  }
+
+  .filter-controls input {
+    width: 100%;
+  }
+
+  .filter-controls select {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .summary-card {
+    padding-top: 13px;
+    padding-right: 13px;
+    padding-bottom: 13px;
+    padding-left: 13px;
+  }
+
+  .summary-card span {
+    font-size: 9px;
+    letter-spacing: 0.5px;
+  }
+
+  .summary-card strong {
+    font-size: 24px;
+  }
+
+  .page-panel {
+    padding-top: 14px;
+    padding-right: 14px;
+    padding-bottom: 14px;
+    padding-left: 14px;
+  }
+
+  .map-container {
+    height: 320px;
+  }
+
+  .calendar-grid {
+    gap: 3px;
+  }
+
+  .calendar-weekday {
+    font-size: 10px;
+  }
+
+  .calendar-day {
+    min-height: 54px;
+    padding-top: 4px;
+    padding-right: 4px;
+    padding-bottom: 4px;
+    padding-left: 4px;
+  }
+
+  .calendar-day b {
+    font-size: 10px;
+  }
+}
+
+/* ==================================================
+   14. DATE POPUP - close button, popup, table, and chart
+   ================================================== */
+
+.date-popup-close-button i {
+  font-size: 30px;
+  align-self: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+button.calendar-day {
+  width: 100%;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+button.calendar-day:hover {
+  border-color: var(--accent-orange);
+  box-shadow: inset 0 0 0 1px var(--accent-orange);
+}
+
+button.calendar-day:focus-visible {
+  outline: 2px solid var(--accent-orange);
+  outline-offset: 2px;
+}
+
+.date-popup {
+  box-sizing: border-box;
+  width: min(900px,calc(100% - 32px));
+  max-height: 85vh;
+  max-height: 85dvh;
+  margin-top: auto;
+  margin-right: auto;
+  margin-bottom: auto;
+  margin-left: auto;
+  padding-top: 24px;
+  padding-right: 24px;
+  padding-bottom: 24px;
+  padding-left: 24px;
+  overflow-y: auto;
+  border: 1px solid var(--surface-border);
+  border-radius: 16px;
+  background: var(--surface-background);
+  color: var(--text-primary);
+  box-shadow: 0 24px 80px rgb(0 0 0 / 50%);
+}
+
+.date-popup::backdrop {
+  background: rgb(0 0 0 / 70%);
+}
+
+.date-popup-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.date-popup-header h2 {
+  margin-top: 8px;
+  margin-right: 0;
+  margin-bottom: 0;
+  margin-left: 0;
+  font-size: 26px;
+}
+
+.date-popup button {
+  border: 1px solid var(--surface-border);
+  border-radius: 8px;
+  background: var(--hover-background);
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.date-popup button:focus-visible {
+  outline: 2px solid var(--accent-orange);
+  outline-offset: 3px;
+}
+
+.observation-table-container:focus-visible {
+  outline: 2px solid var(--accent-orange);
+  outline-offset: 3px;
+}
+
+.date-popup-close-button {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  font-size: 26px;
+  line-height: 1;
+}
+
+.date-popup-summary {
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.date-popup-note {
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.date-popup-empty-message {
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.date-popup-summary strong {
+  color: var(--text-primary);
+}
+
+.date-popup-note {
+  padding-top: 12px;
+  padding-right: 12px;
+  padding-bottom: 12px;
+  padding-left: 12px;
+  border: 1px solid var(--surface-border);
+  border-radius: 8px;
+  background: var(--surface-background);
+}
+
+.observation-table-container {
+  max-height: 400px;
+  overflow: auto;
+  border: 1px solid var(--surface-border);
+  border-radius: 9px;
+}
+
+.observation-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.observation-table th {
+  padding-top: 12px;
+  padding-right: 14px;
+  padding-bottom: 12px;
+  padding-left: 14px;
+  border-bottom: 1px solid var(--surface-border);
+}
+
+.observation-table td {
+  padding-top: 12px;
+  padding-right: 14px;
+  padding-bottom: 12px;
+  padding-left: 14px;
+  border-bottom: 1px solid var(--surface-border);
+}
+
+.observation-table th {
+  position: sticky;
+  top: 0;
+  background: var(--hover-background);
+  color: var(--text-primary);
+  font-size: 12px;
+}
+
+.observation-table td {
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+.observation-table tbody tr:hover {
+  background: var(--surface-background);
+}
+
+.observation-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.pie-chart-panel {
+  margin-top: 20px;
+  margin-right: 0;
+  margin-bottom: 20px;
+  margin-left: 0;
+  padding-top: 20px;
+  padding-right: 20px;
+  padding-bottom: 20px;
+  padding-left: 20px;
+  border: 1px solid var(--surface-border);
+  border-radius: 12px;
+  background: var(--surface-background);
+}
+
+.pie-chart-panel h3 {
+  margin-top: 0;
+  margin-right: 0;
+  margin-bottom: 0;
+  margin-left: 0;
+  font-size: 15px;
+  color: var(--text-primary);
+}
+
+.pie-chart-figure {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  margin-top: 20px;
+  margin-right: 0;
+  margin-bottom: 0;
+  margin-left: 0;
+}
+
+.pie-chart-placeholder {
+  display: block;
+  width: min(220px,100%);
+  height: auto;
+}
+
+.pie-chart-figure figcaption {
+  color: var(--text-secondary);
+  font-size: 13px;
+  text-align: center;
+}
+
+.date-popup-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.date-popup-footer button {
+  min-height: 42px;
+  padding-top: 10px;
+  padding-right: 22px;
+  padding-bottom: 10px;
+  padding-left: 22px;
+}
+
+/* SCREEN SIZE: These changes apply when the window is 600px wide or smaller. */
+@media (max-width:600px) {
+  .date-popup {
+    width: calc(100% - 20px);
+    padding-top: 16px;
+    padding-right: 16px;
+    padding-bottom: 16px;
+    padding-left: 16px;
+  }
+
+  .date-popup-header h2 {
+    font-size: 22px;
+  }
+}
+
+.map-container > .leaflet-container {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* SCREEN SIZE: These changes apply when the window is 700px wide or smaller. */
+@media (max-width: 700px) {
+  .map-panel .map-container {
+    min-height: 380px;
+  }
+}
+
+/* SCREEN SIZE: These changes apply when the window is 420px wide or smaller. */
+@media (max-width: 420px) {
+  .map-panel .map-container {
+    min-height: 320px;
+  }
+}
+
+
+/* THERMAL ACCENTS: Each small box has its own number and top border color. */
+.summary-card {
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
+  border-top-width: 3px;
+}
+.summary-card-total { border-top-color: var(--accent-orange); }
+.summary-card-total strong { color: var(--accent-orange); }
+.summary-card-modis { border-top-color: var(--sensor-modis); }
+.summary-card-modis strong { color: var(--sensor-modis); }
+.summary-card-viirs { border-top-color: var(--sensor-viirs); }
+.summary-card-viirs strong { color: var(--sensor-viirs); }
+.summary-card-days { border-top-color: var(--active-days-color); }
+.summary-card-days strong { color: var(--active-days-color); }
+
+.sidebar-button.sidebar-button-active {
+  background: linear-gradient(110deg, var(--accent-orange), var(--accent-orange-end));
+  color: #0B0F19;
+  box-shadow: 0 0 18px rgba(255, 87, 34, 0.18);
+}
+.sidebar-button.sidebar-button-active small { color: #0B0F19; }
+.sidebar-button:hover { border-color: var(--accent-orange); }
+.filter-controls button { color: var(--accent-orange); }
+.filter-controls button:hover { border-color: var(--accent-orange); }
+.connection-status { color: var(--sensor-viirs); }
+.connection-status-dot { background: var(--sensor-viirs); }
+
+/* DARK MAP: Darken only the map imagery, leaving colored markers unchanged.
+   The existing OpenStreetMap source and attribution stay in place. */
+.map-container .leaflet-tile-pane {
+  filter: invert(1) hue-rotate(180deg) brightness(0.72) contrast(0.9) saturate(0.6);
+}
+.map-container .leaflet-popup-content-wrapper {
+  background: var(--surface-background);
+  color: var(--text-primary);
+  border: 1px solid var(--surface-border);
+}
+.map-container .leaflet-popup-tip { background: var(--surface-background); }
+.map-container .leaflet-control-zoom a {
+  background: var(--surface-background);
+  color: var(--text-primary);
+  border-color: var(--surface-border);
+}
+.map-container .leaflet-control-attribution {
+  background: var(--surface-background);
+  color: var(--text-secondary);
+}
+.map-container .leaflet-control-attribution a { color: var(--sensor-viirs); }
+
+
+/* ==================================================
+   DASHBOARD ANIMATIONS - EDIT SPEEDS HERE
+   Splash timing: SplashScreen.jsx (2000ms total).
+   Number timing: CountUpNumber.jsx (1000ms).
+   Card delay: 0.1s between each card below.
+   ================================================== */
+
+/* INTRO: fixed above everything, including the map and calendar dialog. */
+.splash-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  background: var(--page-background);
+  color: var(--text-primary);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+.splash-screen-leaving {
+  opacity: 0;
+  transform: translateY(-24px);
+}
+.splash-logo-container {
+  position: relative;
+  width: 180px;
+  height: 180px;
+  display: grid;
+  place-items: center;
+}
+.splash-logo {
+  position: relative;
+  z-index: 1;
+  width: 150px;
+  height: 150px;
+  object-fit: contain;
+  animation: splashLogoIn 0.65s ease both;
+  filter: drop-shadow(0 0 22px rgba(255, 87, 34, 0.25));
+}
+.splash-thermal-ring {
+  position: absolute;
+  inset: 14px;
+  border: 1px solid var(--accent-orange);
+  border-radius: 50%;
+  animation: thermalHeatwave 1.5s ease-out infinite;
+}
+.splash-thermal-ring-second { animation-delay: 0.65s; }
+.splash-title {
+  margin-top: 22px;
+  margin-bottom: 8px;
+  font-family: Manrope, sans-serif;
+  letter-spacing: 7px;
+  animation: dashboardReveal 0.6s ease 0.15s both;
+}
+.splash-subtitle {
+  color: var(--text-secondary);
+  font-size: 10px;
+  letter-spacing: 3px;
+  animation: dashboardReveal 0.6s ease 0.25s both;
+}
+
+/* DASHBOARD: Keep controls unavailable until the intro finishes. */
+.dashboard-waiting { visibility: hidden; }
+.dashboard-ready .page-heading { animation: dashboardReveal 0.6s ease both; }
+.dashboard-ready .summary-card { animation: dashboardReveal 0.6s ease backwards; }
+.dashboard-ready .summary-card:nth-child(1) { animation-delay: 0.1s; }
+.dashboard-ready .summary-card:nth-child(2) { animation-delay: 0.2s; }
+.dashboard-ready .summary-card:nth-child(3) { animation-delay: 0.3s; }
+.dashboard-ready .summary-card:nth-child(4) { animation-delay: 0.4s; }
+.dashboard-ready .page-sections .page-panel { animation: dashboardReveal 0.7s ease 0.6s backwards; }
+
+/* CARD HOVER: Lift each box and brighten its existing accent border. */
+.summary-card {
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+.summary-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--accent-orange);
+  box-shadow: 0 10px 28px rgba(255, 87, 34, 0.12);
+}
+.summary-card-viirs:hover {
+  border-color: var(--sensor-viirs);
+  box-shadow: 0 10px 28px rgba(0, 229, 255, 0.1);
+}
+.summary-card-modis:hover { border-color: var(--sensor-modis); }
+.summary-card-days:hover { border-color: var(--active-days-color); }
+.summary-card strong .animated-number,
+.summary-card strong .animated-number span {
+  display: inline;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  font-variant-numeric: tabular-nums;
+}
+
+/* LOGO AND STATUS: Decorative signals, not an indication of live NASA feeds. */
+.sidebar-logo img {
+  transition: transform 0.3s ease, filter 0.3s ease;
+  animation: logoIdleGlow 4s ease-in-out infinite;
+}
+.sidebar-logo:hover img {
+  animation: none;
+  transform: scale(1.04);
+  filter: drop-shadow(0 0 16px rgba(255, 87, 34, 0.5));
+}
+.connection-status-dot {
+  position: relative;
+}
+.connection-status-dot::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px solid var(--sensor-viirs);
+  animation: radarPing 2s ease-out infinite;
+}
+
+/* SIDEBAR: A single highlight slides behind the selected button. */
+.sidebar nav {
+  position: relative;
+  isolation: isolate;
+}
+.sidebar-active-highlight {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 9px;
+  background: linear-gradient(110deg, var(--accent-orange), var(--accent-orange-end));
+  box-shadow: 0 0 18px rgba(255, 87, 34, 0.18);
+  pointer-events: none;
+  transition: transform 0.3s ease, width 0.3s ease, height 0.3s ease, opacity 0.2s ease;
+  z-index: 0;
+}
+.sidebar-button {
+  position: relative;
+  z-index: 1;
+  transition: color 0.3s ease, background-color 0.3s ease;
+}
+.sidebar .sidebar-button.sidebar-button-active {
+  background: transparent;
+  box-shadow: none;
+}
+
+@keyframes splashLogoIn {
+  from { opacity: 0; transform: scale(0.85); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes thermalHeatwave {
+  from { opacity: 0.65; transform: scale(0.8); }
+  to { opacity: 0; transform: scale(1.65); }
+}
+@keyframes dashboardReveal {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes logoIdleGlow {
+  0%, 100% { filter: drop-shadow(0 0 3px rgba(255, 87, 34, 0.1)); }
+  50% { filter: drop-shadow(0 0 10px rgba(255, 87, 34, 0.3)); }
+}
+@keyframes radarPing {
+  from { opacity: 0.8; transform: scale(1); }
+  to { opacity: 0; transform: scale(4); }
+}
+
+/* Respect the device preference for less motion. */
+@media (prefers-reduced-motion: reduce) {
+  .splash-screen, .splash-logo, .splash-thermal-ring, .splash-title, .splash-subtitle,
+  .dashboard-ready .page-heading, .dashboard-ready .summary-card,
+  .dashboard-ready .page-sections .page-panel, .sidebar-logo img,
+  .connection-status-dot::after {
+    animation: none;
+    transition: none;
+  }
+  .summary-card, .sidebar-button, .sidebar-active-highlight { transition: none; }
+  .summary-card:hover, .sidebar-logo:hover img { transform: none; }
+}
 * {
     box-sizing: border-box
 }
