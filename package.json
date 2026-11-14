@@ -7,7 +7,7 @@
     "dev": "vite --host 0.0.0.0",
     "build": "vite build",
     "preview": "vite preview",
-    "import:data": "node scripts/import-firms.mjs"
+    "import:data": "node --env-file=.env scripts/import-firms.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.0",
