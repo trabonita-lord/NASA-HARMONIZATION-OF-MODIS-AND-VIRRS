@@ -4,9 +4,10 @@ import { control } from 'leaflet';
 import { observationBounds } from '../lib/map-utils';
 
 // Fit when a new month/sensor dataset arrives; layer visibility never resets the view.
-export function FitObservationView({ records }) {
+export function FitObservationView({ records, enabled = true }) {
   const map = useMap();
   useEffect(function fitNewRecords() {
+    if (!enabled) return;
     const bounds = observationBounds(records);
     if (!bounds) return;
     const size = map.getSize();
@@ -18,16 +19,6 @@ export function FitObservationView({ records }) {
       maxZoom: 8,
       animate: false,
     });
-  }, [records, map]);
-  return null;
-}
-
-export function MapScale() {
-  const map = useMap();
-  useEffect(function addScale() {
-    const scale = control.scale({ position: 'bottomleft', imperial: false });
-    scale.addTo(map);
-    return function removeScale() { scale.remove(); };
-  }, [map]);
+  }, [records, map, enabled]);
   return null;
 }

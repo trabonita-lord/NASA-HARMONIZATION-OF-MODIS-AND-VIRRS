@@ -109,3 +109,32 @@ export async function loadCalendar(start, end, sensor) {
     (data || []).map(record => [record.day, Number(record.observations)]),
   );
 }
+
+// TIMELINE MAP ONLY: Page through every selected observation, rather than the summary's 1,500-row preview.
+export async function loadTimelineObservations(start, end, sensor, signal) {
+  if (!configured) return { records: filterSample(start, end, sensor), demo: true };
+  const records = [];
+  let offset = 0;
+  while (true) {
+    if (signal?.aborted) throw new DOMException('Cancelled', 'AbortError');
+    let query = supabase.from('fire_observations').select(
+      'id,sensor,satellite,latitude,longitude,acq_date,acq_time,frp,confidence,daynight,source_file',
+      { count: 'exact' },
+    ).gte('acq_date', start).lte('acq_date', end)
+      .order('acq_date', { ascending: true }).order('id', { ascending: true })
+      .range(offset, offset + 999);
+    if (sensor) query = query.eq('sensor', sensor);
+    if (signal) query = query.abortSignal(signal);
+    const response = await query;
+    if (response.error) throw response.error;
+    const page = response.data || [];
+    if (!page.length) {
+      if (response.count > offset) throw new Error('Timeline observations were incomplete. Please retry.');
+      break;
+    }
+    records.push(...page);
+    offset += page.length;
+    if (response.count != null ? offset >= response.count : page.length < 1000) break;
+  }
+  return { records, demo: false };
+}

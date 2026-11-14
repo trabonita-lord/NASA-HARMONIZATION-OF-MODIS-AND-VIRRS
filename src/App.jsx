@@ -3,12 +3,13 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   Activity, CalendarDays, GitCompareArrows, Database, Layers,
   PanelRightClose, PanelRightOpen, Menu, Crosshair, CircleHelp, X, RefreshCcw,
-  Satellite, ChevronRight, Maximize2, Grid2X2,
+  Satellite, ChevronRight, Maximize2, Grid2X2, MapPin, Clock3, BellRing, LayoutDashboard,
 } from 'lucide-react';
 import { loadSummary, loadCalendar } from './lib/data';
 import { configured } from './lib/supabase';
 import { monthRange, observationBounds } from './lib/map-utils';
 import FireMap from './components/FireMap';
+import DashboardPage from './components/DashboardPage';
 import Filters from './components/Filters';
 import LayersPanel from './components/LayersPanel';
 import OverviewPage from './components/OverviewPage';
@@ -16,9 +17,13 @@ import MapPage from './components/MapPage';
 import CalendarPage from './components/CalendarPage';
 import ComparisonPage from './components/ComparisonPage';
 import SourcesPage from './components/SourcesPage';
+import EarlyWarningPage from './components/EarlyWarningPage';
 import DatePopup from './components/DatePopup';
 import SplashScreen from './components/SplashScreen';
 import CountUpNumber from './components/CountUpNumber';
+import MapTimeline from './components/MapTimeline';
+import useMapTimeline from './hooks/useMapTimeline';
+import { HISTORY_END, clampTimelineDate, validTimelineDate } from './lib/timeline-utils';
 import './workspace.css';
 
 export default function App() {
@@ -40,9 +45,17 @@ export default function App() {
   const [panelOpen, setPanelOpen] = useState(true);
   const [navigationOpen, setNavigationOpen] = useState(true);
   const [basemap, setBasemap] = useState('satellite');
-  const [layers, setLayers] = useState({ modis: true, viirs: true, grid: false, coordinates: true });
+  const [layers, setLayers] = useState({ modis: true, viirs: true, grid: false, coordinates: true, wind: false });
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [mapWarning, setMapWarning] = useState('');
+  const [locationToolOpen, setLocationToolOpen] = useState(false);
+  // Timeline selections affect the map; existing monthly dashboard data is kept separate.
+  const [timelineOpen, setTimelineOpen] = useState(false);
+  const [timelineDate, setTimelineDate] = useState(HISTORY_END);
+  const [timelineDays, setTimelineDays] = useState(1);
+  const [timelineReloadKey, setTimelineReloadKey] = useState(0);
+  const timeline = useMapTimeline({ enabled: timelineOpen, date: timelineDate, windowDays: timelineDays, sensor, reloadKey: timelineReloadKey });
+  const mapRecords = timelineOpen ? timeline.records : records;
   const mapReference = useRef(null);
 
   const period = monthRange(month);
@@ -94,6 +107,8 @@ export default function App() {
 
   // 4. SIDEBAR / TOOLBAR ACTIONS
   function openPage(nextPage) {
+    setTimelineOpen(false);
+    setLocationToolOpen(false);
     setPage(nextPage);
     setPanelOpen(true);
   }
@@ -125,7 +140,7 @@ export default function App() {
   function fitObservations() {
     const map = mapReference.current;
     if (!map) return;
-    const bounds = observationBounds(records);
+    const bounds = observationBounds(mapRecords);
     if (bounds) {
       let rightPadding = 35;
       if (panelOpen && map.getSize().x > 1000) rightPadding = 420;
@@ -134,8 +149,15 @@ export default function App() {
       map.setView([12.5, 122.5], 5);
     }
   }
+  function changeTimelineDate(value) {
+    if (validTimelineDate(value)) setTimelineDate(clampTimelineDate(value));
+  }
+  function toggleTimeline() {
+    setTimelineOpen(!timelineOpen);
+    if (!timelineOpen) { setPanelOpen(false); setLocationToolOpen(false); }
+  }
   function railClass(name) {
-    if (page === name && panelOpen) return 'rail-button rail-button-active';
+    if (page === name && (name === 'dashboard' || panelOpen)) return 'rail-button rail-button-active';
     return 'rail-button';
   }
   function handleWelcomeKey(event) {
@@ -143,18 +165,18 @@ export default function App() {
   }
 
   const titles = {
-    overview: 'Overview', map: 'Fires & layers', calendar: 'Activity calendar',
-    compare: 'Sensor comparison', sources: 'Data & methodology', help: 'Workspace guide',
+    dashboard: 'Dashboard', overview: 'Overview', map: 'Fires & layers', calendar: 'Activity calendar',
+    compare: 'Sensor comparison', warnings: 'Early Warning', sources: 'Data & methodology', help: 'Workspace guide',
   };
   const welcomePopupVisible = showPopup && !showSplash && !loading;
   const animateNumbers = !showSplash && !loading;
   let workspaceClass = 'firms-workspace dashboard-ready';
   if (showSplash) workspaceClass = 'firms-workspace dashboard-waiting';
 
-  // 5. VISIBLE WORKSPACE: The map is never unmounted when changing pages.
+  // 5. VISIBLE WORKSPACE: Dashboard replaces the map; other pages use the shared map.
   return (
     <>
-      {showSplash && <SplashScreen onFinish={setShowSplash} />}
+      {showSplash && <SplashScreen onFinish={setShowSplash} ready={!loading} />}
       {welcomePopupVisible && (
         <div className="popup" role="dialog" aria-modal="true" aria-labelledby="welcome-popup-title" onKeyDown={handleWelcomeKey}>
           <div className="popup-content">
@@ -181,22 +203,27 @@ export default function App() {
           </div>
         </header>
 
-        <main className="map-workspace" aria-label="Thermal activity map workspace">
-          {/* FULL-SCREEN MAP: One instance shared by every panel. */}
-          <FireMap records={records} layers={layers} basemap={basemap} mapReference={mapReference} selectedLocation={selectedLocation} onBasemapWarning={setMapWarning} />
-
+        <main className={page === 'dashboard' ? (navigationOpen ? 'dashboard-workspace' : 'dashboard-workspace dashboard-navigation-hidden') : timelineOpen ? 'map-workspace timeline-visible' : 'map-workspace'} aria-label={page === 'dashboard' ? 'Analytics dashboard' : 'Thermal activity map workspace'}>
           {/* SIDEBAR: Existing pages remain available as direct buttons. */}
           {navigationOpen && (
             <nav className="workspace-rail" aria-label="Workspace pages">
+              <button type="button" className={railClass('dashboard')} aria-pressed={page === 'dashboard'} title="Dashboard" onClick={() => openPage('dashboard')}><LayoutDashboard size={22} /><span>Dashboard</span></button>
               <button type="button" className={railClass('overview')} aria-pressed={page === 'overview' && panelOpen} title="Overview" onClick={() => openPage('overview')}><Activity size={22} /><span>Overview</span></button>
               <button type="button" className={railClass('map')} aria-pressed={page === 'map' && panelOpen} title="Fire hotspot map and layers" onClick={() => openPage('map')}><Layers size={22} /><span>Layers</span></button>
+              <button type="button" className={railClass('warnings')} aria-pressed={page === 'warnings' && panelOpen} title="Early Warning" onClick={() => openPage('warnings')}><BellRing size={22} /><span>Warnings</span></button>
               <button type="button" className={railClass('calendar')} aria-pressed={page === 'calendar' && panelOpen} title="Activity calendar" onClick={() => openPage('calendar')}><CalendarDays size={22} /><span>Calendar</span></button>
               <button type="button" className={railClass('compare')} aria-pressed={page === 'compare' && panelOpen} title="Sensor comparison" onClick={() => openPage('compare')}><GitCompareArrows size={22} /><span>Compare</span></button>
               <button type="button" className={railClass('sources')} aria-pressed={page === 'sources' && panelOpen} title="Data and methodology" onClick={() => openPage('sources')}><Database size={22} /><span>Sources</span></button>
+              {page !== 'dashboard' && (<>
               <div className="rail-separator" />
               <button type="button" className="rail-button" title="Fit observations" onClick={fitObservations}><Crosshair size={22} /><span>Fit view</span></button>
+              </>)}
             </nav>
           )}
+
+          {page === 'dashboard' ? <DashboardPage onNavigate={openPage} /> : (<>
+          {/* FULL-SCREEN MAP: Shared by the map panels; removed on Dashboard. */}
+          <FireMap records={mapRecords} timelineActive={timelineOpen} layers={layers} basemap={basemap} mapReference={mapReference} selectedLocation={selectedLocation} onBasemapWarning={setMapWarning} locationToolOpen={locationToolOpen} onCloseLocationTool={() => setLocationToolOpen(false)} />
 
           {/* MAP STATUS: Clearly distinguish sample data, errors, and hidden layers. */}
           <div className="map-period-chip"><Satellite size={14} /><span>OBSERVATIONS <b>{month}</b> · {sensor || 'All sensors'}</span>{loading && <RefreshCcw size={13} className="loading-spinner" />}</div>
@@ -212,6 +239,7 @@ export default function App() {
                 <button type="button" className="panel-close-button" aria-label="Close side panel" onClick={() => setPanelOpen(false)}><PanelRightClose size={21} /></button>
               </div>
               <div className="workspace-panel-scroll">
+                {page !== 'warnings' && (<>
                 {/* PERIOD FILTERS: Existing month arrows, month picker, and sensor filter. */}
                 <section className="panel-period">
                   <div className="panel-section-label">OBSERVATION PERIOD <span>UTC</span></div>
@@ -226,12 +254,15 @@ export default function App() {
                   <div className="summary-card summary-card-days"><span>ACTIVE DAYS</span><strong>{days}</strong><small>With observations</small></div>
                 </div>
 
+                </>)}
+
                 <div className="workspace-page-content">
                   {page === 'overview' && <OverviewPage onOpenLayers={() => openPage('map')} />}
                   {page === 'map' && <><MapPage /><LayersPanel layers={layers} onChangeLayer={changeLayer} basemap={basemap} onChangeBasemap={changeBasemap} onLocate={locateCoordinate} modis={modis} viirs={viirs} /></>}
                   {page === 'calendar' && <CalendarPage month={month} counts={counts} onSelectDate={setSelectedDate} />}
                   {page === 'compare' && <ComparisonPage modis={modis} viirs={viirs} />}
                   {page === 'sources' && <SourcesPage />}
+                  {page === 'warnings' && <EarlyWarningPage onOpenLocations={() => { setPanelOpen(false); setTimelineOpen(false); setLocationToolOpen(true); }} onViewOnMap={(latitude, longitude) => { setPanelOpen(false); setTimelineOpen(false); setLocationToolOpen(false); locateCoordinate(latitude, longitude); }} />}
                   {page === 'help' && (
                     <section className="workspace-help">
                       <h2>Explore the workspace</h2>
@@ -247,21 +278,25 @@ export default function App() {
               </div>
             </aside>
           ) : (
-            <button type="button" className="reopen-panel-button" onClick={() => setPanelOpen(true)}><PanelRightOpen size={18} /> Open panel</button>
+            <button type="button" className="reopen-panel-button" onClick={() => { setTimelineOpen(false); setPanelOpen(true); }}><PanelRightOpen size={18} /> Open panel</button>
           )}
+
+          <div className="workspace-bottom-controls">
+          {timelineOpen && <MapTimeline date={timelineDate} windowDays={timelineDays} data={timeline} onDateChange={changeTimelineDate} onWindowChange={setTimelineDays} onClose={() => setTimelineOpen(false)} onRetry={() => setTimelineReloadKey(value => value + 1)} />}
 
           {/* BOTTOM TOOLBAR: Every visible tool has a working action. */}
           <div className="workspace-toolbar" role="toolbar" aria-label="Map tools">
-            <button type="button" onClick={() => openPage('map')}><Layers size={21} /><span>Layers</span></button>
+            <button type="button" aria-label="Toggle map timeline" aria-pressed={timelineOpen} onClick={toggleTimeline}><Clock3 size={21} /><span>Timeline</span></button>
+            <button type="button" aria-label="Toggle location tool" aria-pressed={locationToolOpen} onClick={() => { setTimelineOpen(false); setLocationToolOpen(!locationToolOpen); if (!locationToolOpen) setPanelOpen(false); }}><MapPin size={21} /><span>Location</span></button>
             <button type="button" onClick={() => changeLayer('grid', !layers.grid)} aria-pressed={layers.grid}><Grid2X2 size={21} /><span>Lat / Lon</span></button>
-            <button type="button" onClick={() => openPage('calendar')}><CalendarDays size={21} /><span>Calendar</span></button>
-            <button type="button" onClick={fitObservations}><Crosshair size={21} /><span>Fit view</span></button>
-            <button type="button" onClick={() => setPanelOpen(!panelOpen)} aria-pressed={!panelOpen}><Maximize2 size={21} /><span>{panelOpen ? 'Full map' : 'Panel'}</span></button>
+            <button type="button" onClick={() => { setTimelineOpen(false); setPanelOpen(!panelOpen); }} aria-pressed={!panelOpen}><Maximize2 size={21} /><span>{panelOpen ? 'Full map' : 'Panel'}</span></button>
           </div>
-          <div className="map-sensor-legend" aria-label="Map sensor colors"><span><i className="modis-swatch" />MODIS</span><span><i className="viirs-swatch" />VIIRS</span></div>
+          </div>
+          <div className="map-sensor-legend" aria-label="Map sensor colors"><span><i className="modis-swatch" />MODIS</span><span><i className="viirs-swatch" />VIIRS</span>{timelineOpen && <span><i style={{ background: '#D4A3FF' }} />Forecast</span>}</div>
+          </>)}
         </main>
       </div>
-      {selectedDate && <DatePopup date={selectedDate} onClose={closeDatePopup} />}
+      {page !== 'dashboard' && selectedDate && <DatePopup date={selectedDate} onClose={closeDatePopup} />}
     </>
   );
 }

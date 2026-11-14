@@ -1,130 +1,61 @@
-/* Full-screen intro video, then a clean TANAW logo reveal. */
-.splash-screen.tanaw-video-intro {
+﻿/* STARTUP SPLASH: centered wordmark, restrained thermal glow, clean loading line.
+   Change these colors here. Timing is at the top of SplashScreen.jsx. */
+.splash-screen.tanaw-launch {
+  --intro-background: #0B0F19;
+  --intro-accent: var(--accent-orange, #FF5722);
+  --intro-cyan: var(--sensor-viirs, #00E5FF);
   position: fixed;
   inset: 0;
   z-index: 9999;
+  display: grid;
+  place-items: center;
   overflow: hidden;
   isolation: isolate;
-  background: #030612;
-  perspective: 1200px;
-  transition: opacity .7s ease, filter .7s ease;
-}
-.tanaw-intro-backdrop {
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(ellipse at 50% 45%, rgba(22, 128, 212, .2), transparent 38%),
-    radial-gradient(ellipse at 78% 64%, rgba(104, 53, 193, .24), transparent 52%),
-    radial-gradient(ellipse at 20% 68%, rgba(16, 83, 158, .18), transparent 45%),
-    #030612;
-}
-.tanaw-intro-video {
-  position: absolute;
-  z-index: 1;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  /* Fill the viewport; crop the edges when the video and screen shapes differ. */
-  object-fit: cover;
-  object-position: center;
+  background: var(--intro-background);
+  color: #EDF4F9;
   opacity: 1;
-  filter: saturate(1.08) contrast(1.04);
-  transform: scale(1);
-  transition: opacity .9s ease, filter .9s ease, transform 1.1s cubic-bezier(.2,.7,.2,1);
+  transition: opacity 360ms ease;
 }
-.tanaw-intro-vignette {
-  position: absolute;
-  z-index: 2;
-  inset: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(ellipse at center, transparent 28%, rgba(3, 6, 18, .22) 62%, rgba(3, 6, 18, .9) 100%),
-    linear-gradient(180deg, rgba(3, 6, 18, .12), transparent 24%, transparent 73%, rgba(3, 6, 18, .55));
+.launch-ambient { position: absolute; inset: 0; z-index: -2; pointer-events: none; background: radial-gradient(ellipse at 50% 45%, rgba(198, 64, 29, .12), transparent 45%), radial-gradient(ellipse at 80% 80%, rgba(17, 88, 116, .09), transparent 55%); }
+.launch-grid { position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: .13; background-image: linear-gradient(rgba(134, 164, 187, .15) 1px, transparent 1px), linear-gradient(90deg, rgba(134, 164, 187, .15) 1px, transparent 1px); background-size: 64px 64px; -webkit-mask-image: radial-gradient(ellipse at center, black, transparent 65%); mask-image: radial-gradient(ellipse at center, black, transparent 65%); }
+.launch-content { display: flex; align-items: center; flex-direction: column; width: min(480px, calc(100% - 48px)); text-align: center; animation: launchContentIn 650ms cubic-bezier(.2, .7, .2, 1) both; }
+.launch-kicker { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 27px; color: #7F99AF; font: 500 8px 'DM Sans', sans-serif; letter-spacing: 2px; }
+.launch-kicker > span { width: 4px; height: 4px; border-radius: 50%; background: var(--intro-cyan); opacity: .8; }
+.launch-wordmark { width: min(420px, 100%); aspect-ratio: 870 / 272; display: grid; place-items: center; }
+.launch-wordmark img { grid-area: 1 / 1; display: block; width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 8px 26px rgba(221, 71, 44, .13)); }
+.launch-wordmark h1 { grid-area: 1 / 1; margin: 0; font: 800 46px Manrope, sans-serif; letter-spacing: 10px; color: #F7DDD0; }
+.launch-wordmark .launch-logo-loading { opacity: 0; }
+.launch-wordmark .launch-logo-ready { opacity: 1; }
+.launch-tagline { display: flex; align-items: center; justify-content: center; gap: 9px; margin: 23px 0 25px; color: #B6A08B; font: 500 9px 'DM Sans', sans-serif; letter-spacing: 2.2px; }
+.launch-tagline span { color: #F0A168; }
+.launch-progress { position: relative; width: min(210px, 60vw); height: 2px; overflow: hidden; border-radius: 2px; background: rgba(147, 160, 176, .15); }
+.launch-progress > span { position: absolute; inset: 0; width: 65%; border-radius: inherit; background: linear-gradient(90deg, transparent, var(--intro-accent), #FFC17B, transparent); transform: translateX(-110%); animation: launchScan 1500ms ease-in-out infinite; }
+.launch-status { min-height: 16px; margin: 11px 0 0; color: #8298AC; font: 400 10px 'DM Sans', sans-serif; letter-spacing: .3px; }
+.launch-continue { display: inline-flex; align-items: center; justify-content: center; gap: 7px; margin-top: 22px; min-height: 34px; padding: 7px 13px; border: 1px solid rgba(137, 165, 189, .22); border-radius: 6px; background: rgba(21, 38, 54, .35); color: #AFC5D7; font: 500 11px 'DM Sans', sans-serif; transition: border-color .2s, background-color .2s, color .2s; }
+.launch-continue:not(:disabled):hover { border-color: rgba(242, 159, 100, .55); background: rgba(87, 51, 31, .3); color: #FFD0AC; }
+.launch-continue:focus-visible { outline: 2px solid #FFC38F; outline-offset: 4px; }
+.launch-continue:disabled { opacity: .5; cursor: default; }
+.launch-footer { position: absolute; bottom: max(28px, env(safe-area-inset-bottom)); left: 20px; right: 20px; display: flex; align-items: center; justify-content: center; gap: 12px; color: #4F667C; font: 500 8px 'DM Sans', sans-serif; letter-spacing: 1.3px; }
+.launch-footer i { width: 2px; height: 2px; background: #617C94; border-radius: 50%; }
+.splash-screen.tanaw-launch.tanaw-launch-leaving { opacity: 0; }
+.tanaw-launch-leaving .launch-progress > span { animation: none; width: 100%; transform: none; opacity: .55; }
+@keyframes launchContentIn { from { opacity: 0; transform: translateY(12px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes launchScan { from { transform: translateX(-110%); } to { transform: translateX(165%); } }
+@media (max-width: 600px) {
+  .launch-kicker { margin-bottom: 22px; font-size: 7px; letter-spacing: 1.2px; }
+  .launch-tagline { margin: 21px 0; gap: 7px; font-size: 7px; letter-spacing: 1.4px; }
+  .launch-wordmark h1 { font-size: 35px; letter-spacing: 7px; }
+  .launch-footer { bottom: max(21px, env(safe-area-inset-bottom)); gap: 9px; font-size: 6px; letter-spacing: 1px; }
 }
-.tanaw-video-logo-visible .tanaw-intro-video {
-  opacity: 0;
-  filter: blur(8px) brightness(1.5);
-  transform: scale(1.045);
-}
-.splash-logo-lockup {
-  position: absolute;
-  z-index: 3;
-  top: 47%;
-  left: 50%;
-  display: flex;
-  width: min(360px, 84vw);
-  flex-direction: column;
-  align-items: center;
-  transform: translate(-50%, -50%) scale(.78) rotateY(9deg);
-  transform-style: preserve-3d;
-  opacity: 0;
-  filter: blur(10px);
-  text-align: center;
-  pointer-events: none;
-}
-.tanaw-video-logo-visible .splash-logo-lockup {
-  animation: tanawLogoReveal 1.05s cubic-bezier(.18,.72,.25,1) both;
-}
-.splash-logo-aura {
-  position: absolute;
-  z-index: -1;
-  top: 3%;
-  left: 50%;
-  width: 92%;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  transform: translateX(-50%);
-  background: radial-gradient(ellipse, rgba(255,43,43,.42), rgba(199,26,52,.24) 40%, rgba(255,121,44,.14) 58%, transparent 73%);
-  filter: blur(14px);
-}
-.tanaw-video-logo-visible .splash-logo-aura { animation: tanawAuraBreathe 2.4s ease-in-out infinite alternate; }
-.splash-logo-image {
-  display: block;
-  width: min(300px, 74vw);
-  height: min(300px, 74vw);
-  object-fit: contain;
-  filter: drop-shadow(0 0 18px rgba(255,54,44,.46)) drop-shadow(0 0 38px rgba(207,35,54,.25));
-}
-.splash-brand-rule {
-  width: 72px;
-  height: 1px;
-  margin: -4px auto 16px;
-  background: linear-gradient(90deg, transparent, #ff5148, #ffad57, transparent);
-  box-shadow: 0 0 14px rgba(255,66,52,.58);
-}
-.splash-logo-lockup h1 {
-  margin: 0 0 9px 8px;
-  color: #f6fbff;
-  font-family: Manrope, sans-serif;
-  font-size: 32px;
-  font-weight: 800;
-  letter-spacing: 9px;
-  text-shadow: 0 0 24px rgba(255,70,54,.3);
-}
-.splash-logo-lockup p {
-  margin: 0;
-  color: #a3b7ca;
-  font-size: 9px;
-  letter-spacing: 3px;
-}
-.splash-screen.tanaw-video-intro.tanaw-video-intro-leaving {
-  opacity: 0;
-  filter: blur(5px);
-  pointer-events: none;
-}
-@keyframes tanawLogoReveal {
-  0% { opacity: 0; filter: blur(12px) brightness(1.7); transform: translate(-50%,-50%) scale(.72) rotateY(12deg); }
-  68% { opacity: 1; filter: blur(1px) brightness(1.2); transform: translate(-50%,-50%) scale(1.045) rotateY(-2deg); }
-  100% { opacity: 1; filter: blur(0) brightness(1); transform: translate(-50%,-50%) scale(1) rotateY(0); }
-}
-@keyframes tanawAuraBreathe { from { opacity: .52; transform: translateX(-50%) scale(.94); } to { opacity: 1; transform: translateX(-50%) scale(1.08); } }
 @media (max-height: 520px) {
-  .splash-logo-lockup { top: 50%; }
-  .splash-logo-image { width: min(190px, 39vh); height: min(190px, 39vh); }
-  .splash-logo-lockup h1 { font-size: 25px; }
+  .launch-content { width: min(330px, calc(100% - 40px)); }
+  .launch-kicker { margin-bottom: 12px; }
+  .launch-tagline { margin: 12px 0 16px; }
+  .launch-continue { margin-top: 12px; }
+  .launch-footer { bottom: 12px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .splash-screen.tanaw-video-intro, .tanaw-intro-video { transition: none; }
-  .tanaw-video-logo-visible .splash-logo-lockup, .tanaw-video-logo-visible .splash-logo-aura { animation: none; }
-  .splash-logo-lockup { opacity: 1; filter: none; transform: translate(-50%,-50%); }
+  .splash-screen.tanaw-launch, .launch-continue { transition: none; }
+  .launch-content, .launch-progress > span { animation: none; }
+  .launch-progress > span { width: 100%; transform: none; opacity: .5; }
 }

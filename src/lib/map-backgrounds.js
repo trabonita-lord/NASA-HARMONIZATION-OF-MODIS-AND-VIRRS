@@ -19,10 +19,12 @@ export const MAP_BACKGROUNDS = {
     maxNativeZoom: 19,
   },
   light: {
-    url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
-    maxNativeZoom: 19,
-    subdomains: 'abcd',
+    // MapTiler Dataviz Light: 512px raster tiles with Leaflet's matching zoom offset.
+    url: 'https://api.maptiler.com/maps/dataviz-v4-light/{z}/{x}/{y}.png?key=o7Tvxatue0cBhvpv1oDU',
+    attribution: '&copy; <a href="https://www.maptiler.com/copyright/">MapTiler</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    tileSize: 512,
+    zoomOffset: -1,
+    maxNativeZoom: 22,
   },
 };
 

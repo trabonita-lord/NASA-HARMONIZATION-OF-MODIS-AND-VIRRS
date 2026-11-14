@@ -237,6 +237,8 @@
   left: 16px;
   z-index: 700;
   width: var(--navigation-width);
+  max-height: calc(100% - 32px);
+  overflow-y: auto;
   display: grid;
   gap: 4px;
   padding: 7px;

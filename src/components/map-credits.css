@@ -1,0 +1,7 @@
+﻿/* Small disclosure: full provider credits remain available without a long strip. */
+.map-credits { position: absolute; right: 8px; bottom: 2px; z-index: 800; font: 9px 'DM Sans', sans-serif; color: #B3CADB; }
+.map-credits summary { display: block; padding: 3px 7px; border: 1px solid rgba(147, 181, 205, .25); border-radius: 4px; background: rgba(9, 25, 41, .75); cursor: pointer; list-style: none; }
+.map-credits summary::-webkit-details-marker { display: none; }
+.map-credits summary:focus-visible { outline: 2px solid #FFC28D; outline-offset: 2px; }
+.map-credits-content { position: absolute; bottom: 25px; right: 0; width: min(360px, calc(100vw - 30px)); display: grid; gap: 8px; padding: 12px; border: 1px solid #405B70; border-radius: 8px; background: rgba(9, 25, 41, .95); box-shadow: 0 4px 15px #0005; line-height: 1.7; }
+.map-credits-content a { color: #8ADCE7; }
