@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "builtOn": "2026-11-09",
+  "totalObservations": 75028,
+  "sources": [
+    {
+      "totalRows": 5376,
+      "group": "M-C61_841429",
+      "archiveName": "DL_FIRE_M-C61_841429.zip",
+      "sensor": "MODIS",
+      "files": [
+        {
+          "rows": 5112,
+          "endDate": "2026-08-30",
+          "type": "archive",
+          "file": "fire_archive_M-C61_841429.csv",
+          "startDate": "2026-01-02"
+        },
+        {
+          "rows": 264,
+          "endDate": "2026-11-09",
+          "type": "nrt",
+          "file": "fire_nrt_M-C61_841429.csv",
+          "startDate": "2026-09-02"
+        }
+      ],
+      "label": "MODIS Collection 6.1"
+    },
+    {
+      "totalRows": 35109,
+      "group": "J2V-C2_841431",
+      "archiveName": "DL_FIRE_J2V-C2_841431.zip",
+      "sensor": "VIIRS",
+      "files": [
+        {
+          "rows": 32348,
+          "endDate": "2026-07-31",
+          "type": "archive",
+          "file": "fire_archive_J2V-C2_841431.csv",
+          "startDate": "2026-01-01"
+        },
+        {
+          "rows": 2761,
+          "endDate": "2026-11-09",
+          "type": "nrt",
+          "file": "fire_nrt_J2V-C2_841431.csv",
+          "startDate": "2026-08-01"
+        }
+      ],
+      "label": "VIIRS 375 m · NOAA-21"
+    },
+    {
+      "totalRows": 34543,
+      "group": "SV-C2_841432",
+      "archiveName": "DL_FIRE_SV-C2_841432 (1).zip",
+      "sensor": "VIIRS",
+      "files": [
+        {
+          "rows": 31764,
+          "endDate": "2026-07-31",
+          "type": "archive",
+          "file": "fire_archive_SV-C2_841432.csv",
+          "startDate": "2026-01-01"
+        },
+        {
+          "rows": 2779,
+          "endDate": "2026-11-02",
+          "type": "nrt",
+          "file": "fire_nrt_SV-C2_841432.csv",
+          "startDate": "2026-08-01"
+        }
+      ],
+      "label": "VIIRS 375 m · Suomi NPP"
+    }
+  ],
+  "recordsFile": "firms-2026.js",
+  "recordFields": [
+    "id",
+    "latitude",
+    "longitude",
+    "acq_date",
+    "acq_time",
+    "sensor",
+    "satellite",
+    "instrument",
+    "confidence",
+    "version",
+    "brightness",
+    "bright_t31",
+    "frp",
+    "scan",
+    "track",
+    "daynight",
+    "type",
+    "source_file",
+    "source_group"
+  ],
+  "rowPolicy": "Keep every source row. No observations are deduplicated or merged; candidate relationships are analytical outputs, not record identity."
+}

@@ -1,0 +1,9 @@
+{
+  "builtOn": "2026-11-10",
+  "sourceRows": 75028,
+  "invalidCoordinates": 0,
+  "missingRequiredFields": 0,
+  "duplicateObservationKeys": 0,
+  "duplicateKeyDefinition": "latitude + longitude + UTC acquisition date/time + satellite + instrument",
+  "policy": "Preserve every source row; no silent deduplication. Spatial-temporal relationships are candidate associations only."
+}
