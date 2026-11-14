@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // MAP WORKSPACE: One full-screen map, existing pages in the right-hand panel.
 // Sidebar buttons are written directly below. Appearance: workspace.css.
 // Data loading, monthly filters, date popup, chart, and intro are preserved.
@@ -6,6 +7,17 @@ import {
   Activity, CalendarDays, GitCompareArrows, Database, Layers,
   PanelRightClose, PanelRightOpen, Menu, Crosshair, CircleHelp, X, RefreshCcw,
   Satellite, ChevronRight, Maximize2, Grid2X2,
+=======
+import React, { useEffect, useState } from 'react';
+import {
+  Activity,
+  MapPinned,
+  CalendarDays,
+  GitCompareArrows,
+  Database,
+  Info,
+  RefreshCcw,
+>>>>>>> origin/main
 } from 'lucide-react';
 import { loadSummary, loadCalendar } from './lib/data';
 import { configured } from './lib/supabase';
