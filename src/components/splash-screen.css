@@ -1,0 +1,218 @@
+/* FIRE OWL INTRO - animation styles only.
+   Flight and wings: first 2.7 seconds.
+   Exact PNG logo appears after 2.3 seconds.
+   Total timing is in SplashScreen.jsx. */
+.splash-screen.fire-owl-intro {
+  background: #080C15;
+  perspective: 900px;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.fire-owl-background-glow {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 50% 44%, rgba(132, 38, 14, 0.2), transparent 48%),
+    radial-gradient(ellipse at 30% 80%, rgba(84, 28, 12, 0.1), transparent 50%);
+}
+
+.fire-owl-scene {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.fire-owl-flight {
+  position: absolute;
+  left: 50%;
+  top: 43%;
+  width: 480px;
+  aspect-ratio: 500 / 380;
+  margin-left: -240px;
+  margin-top: -182px;
+  opacity: 0;
+  transform-origin: center;
+  will-change: transform, opacity;
+}
+
+.fire-owl-ready .fire-owl-flight {
+  animation: owlFlightToLogo 2.7s ease-in-out both;
+}
+
+.fire-owl-bird {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  filter: drop-shadow(0 0 8px rgba(255, 133, 43, 0.75)) drop-shadow(0 0 25px rgba(255, 65, 12, 0.4));
+}
+
+.fire-owl-wing {
+  transform-origin: 225px 180px;
+}
+
+.fire-owl-ready .fire-owl-wing {
+  animation: owlWingBeat 0.6s ease-in-out 4 both;
+}
+
+.fire-owl-embers {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.fire-owl-final {
+  position: absolute;
+  left: 50%;
+  top: 43%;
+  width: 280px;
+  height: 280px;
+  max-width: 68vw;
+  max-height: 68vw;
+  opacity: 0;
+  transform: translate(-50%, -50%);
+}
+
+.fire-owl-ready .fire-owl-final {
+  animation: owlExactLogoReveal 0.8s ease 2.3s both;
+}
+
+.fire-owl-original-logo {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 0 16px rgba(255, 104, 25, 0.3));
+}
+
+.fire-owl-logo-glow {
+  position: absolute;
+  inset: -20%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(255, 87, 34, 0.18), transparent 67%);
+}
+
+.fire-owl-ready .fire-owl-logo-glow {
+  animation: owlLogoFireBreath 1.8s ease-in-out infinite alternate;
+}
+
+.fire-owl-reveal-ring {
+  position: absolute;
+  left: 50%;
+  top: 43%;
+  width: 180px;
+  height: 180px;
+  border: 1px solid rgba(255, 155, 60, 0.65);
+  border-radius: 50%;
+  opacity: 0;
+}
+
+.fire-owl-ready .fire-owl-reveal-ring {
+  animation: owlRevealHeatwave 1.2s ease-out 2.25s both;
+}
+
+.fire-owl-brand {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  top: calc(43% + 155px);
+  text-align: center;
+  opacity: 0;
+}
+
+.fire-owl-ready .fire-owl-brand {
+  animation: owlBrandIntoView 0.7s ease 2.65s both;
+}
+
+.fire-owl-brand h1 {
+  margin-top: 18px;
+  margin-bottom: 8px;
+  margin-left: 9px;
+  font-family: Manrope, sans-serif;
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: 9px;
+  color: #F8FAFC;
+}
+
+.fire-owl-brand p {
+  color: #94A3B8;
+  font-size: 9px;
+  letter-spacing: 3px;
+}
+
+.fire-owl-brand-rule {
+  width: 64px;
+  height: 1px;
+  margin-left: auto;
+  margin-right: auto;
+  background: linear-gradient(90deg, transparent, #FF8C35, transparent);
+}
+
+@keyframes owlFlightToLogo {
+  0% { opacity: 0; transform: translate(48vw, 28vh) rotate(-24deg) scale(0.22); }
+  13% { opacity: 1; }
+  18% { transform: translate(27vw, 12vh) rotate(-16deg) scale(0.48); }
+  38% { transform: translate(-20vw, -10vh) rotate(18deg) scale(0.72); }
+  60% { transform: translate(8vw, 4vh) rotate(-8deg) scale(0.88); }
+  80% { opacity: 1; transform: translate(0, 0) rotate(0) scale(1); }
+  88% { opacity: 1; transform: translate(0, 0) rotate(0) scale(0.98); }
+  100% { opacity: 0; transform: translate(0, 0) rotate(0) scale(0.68); }
+}
+
+@keyframes owlWingBeat {
+  0%, 100% { transform: rotate(-7deg) scaleY(1); }
+  45% { transform: rotate(-38deg) scaleY(0.38); }
+  70% { transform: rotate(-2deg) scaleY(1.04); }
+}
+
+@keyframes owlExactLogoReveal {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0.85); filter: blur(5px); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1); filter: blur(0); }
+}
+
+@keyframes owlRevealHeatwave {
+  from { opacity: 0.6; transform: translate(-50%, -50%) scale(0.7); }
+  to { opacity: 0; transform: translate(-50%, -50%) scale(2.7); }
+}
+
+@keyframes owlLogoFireBreath {
+  from { opacity: 0.45; transform: scale(0.95); }
+  to { opacity: 0.9; transform: scale(1.06); }
+}
+
+@keyframes owlBrandIntoView {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 520px) {
+  .fire-owl-flight { width: 360px; margin-left: -180px; margin-top: -137px; }
+  .fire-owl-final { width: 240px; height: 240px; }
+  .fire-owl-brand { top: calc(43% + 135px); }
+}
+
+@media (max-width: 380px) {
+  .fire-owl-flight { width: 280px; margin-left: -140px; margin-top: -106px; }
+}
+
+@media (max-height: 520px) {
+  .fire-owl-final { width: 170px; height: 170px; }
+  .fire-owl-brand { top: calc(43% + 90px); }
+  .fire-owl-brand h1 { font-size: 24px; margin-top: 12px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .splash-screen.fire-owl-intro { transition: none; }
+  .fire-owl-ready .fire-owl-flight, .fire-owl-ready .fire-owl-wing,
+  .fire-owl-ready .fire-owl-final, .fire-owl-ready .fire-owl-logo-glow,
+  .fire-owl-ready .fire-owl-reveal-ring, .fire-owl-ready .fire-owl-brand {
+    animation: none;
+  }
+  .fire-owl-flight, .fire-owl-embers { display: none; }
+  .fire-owl-final, .fire-owl-brand { opacity: 1; }
+}
