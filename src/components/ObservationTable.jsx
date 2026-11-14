@@ -1,7 +1,7 @@
-// Edit popup table headings here. Rows stay empty for a future backend.
+
 import React from 'react';
 
-export default function ObservationTable() {
+export default function ObservationTable({ observations = [] }) {
   return (
     <div
       className="observation-table-container"
@@ -22,7 +22,41 @@ export default function ObservationTable() {
         </thead>
 
         <tbody>
-          {/* Add observation rows here later. */}
+          {observations.length === 0 ? (
+            <tr>
+              <td colSpan={6} style={{ textAlign: 'center' }}>
+                No observations found for this date.
+              </td>
+            </tr>
+          ) : (
+            observations.map((observation) => (
+              <tr key={observation.id}>
+                <td>{observation.sensor ?? 'N/A'}</td>
+
+                <td>{observation.satellite ?? 'N/A'}</td>
+
+                <td>
+                  {observation.latitude != null
+                    ? Number(observation.latitude).toFixed(5)
+                    : 'N/A'}
+                </td>
+
+                <td>
+                  {observation.longitude != null
+                    ? Number(observation.longitude).toFixed(5)
+                    : 'N/A'}
+                </td>
+
+                <td>
+                  {observation.frp != null
+                    ? Number(observation.frp).toFixed(2)
+                    : 'N/A'}
+                </td>
+
+                <td>{observation.confidence ?? 'N/A'}</td>
+              </tr>
+            ))
+          )}
         </tbody>
       </table>
     </div>
