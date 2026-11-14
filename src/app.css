@@ -1434,66 +1434,10 @@ button.calendar-day:focus-visible {
 
 /* ==================================================
    DASHBOARD ANIMATIONS - EDIT SPEEDS HERE
-   Splash timing: SplashScreen.jsx (2000ms total).
+   Video intro timing and styles: components/SplashScreen.jsx and splash-screen.css.
    Number timing: CountUpNumber.jsx (1000ms).
    Card delay: 0.1s between each card below.
    ================================================== */
-
-/* INTRO: fixed above everything, including the map and calendar dialog. */
-.splash-screen {
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  overflow: hidden;
-  background: var(--page-background);
-  color: var(--text-primary);
-  transition: opacity 0.4s ease, transform 0.4s ease;
-}
-.splash-screen-leaving {
-  opacity: 0;
-  transform: translateY(-24px);
-}
-.splash-logo-container {
-  position: relative;
-  width: 180px;
-  height: 180px;
-  display: grid;
-  place-items: center;
-}
-.splash-logo {
-  position: relative;
-  z-index: 1;
-  width: 150px;
-  height: 150px;
-  object-fit: contain;
-  animation: splashLogoIn 0.65s ease both;
-  filter: drop-shadow(0 0 22px rgba(255, 87, 34, 0.25));
-}
-.splash-thermal-ring {
-  position: absolute;
-  inset: 14px;
-  border: 1px solid var(--accent-orange);
-  border-radius: 50%;
-  animation: thermalHeatwave 1.5s ease-out infinite;
-}
-.splash-thermal-ring-second { animation-delay: 0.65s; }
-.splash-title {
-  margin-top: 22px;
-  margin-bottom: 8px;
-  font-family: Manrope, sans-serif;
-  letter-spacing: 7px;
-  animation: dashboardReveal 0.6s ease 0.15s both;
-}
-.splash-subtitle {
-  color: var(--text-secondary);
-  font-size: 10px;
-  letter-spacing: 3px;
-  animation: dashboardReveal 0.6s ease 0.25s both;
-}
 
 /* DASHBOARD: Keep controls unavailable until the intro finishes. */
 .dashboard-waiting { visibility: hidden; }
@@ -1577,14 +1521,6 @@ button.calendar-day:focus-visible {
   box-shadow: none;
 }
 
-@keyframes splashLogoIn {
-  from { opacity: 0; transform: scale(0.85); }
-  to { opacity: 1; transform: scale(1); }
-}
-@keyframes thermalHeatwave {
-  from { opacity: 0.65; transform: scale(0.8); }
-  to { opacity: 0; transform: scale(1.65); }
-}
 @keyframes dashboardReveal {
   from { opacity: 0; transform: translateY(18px); }
   to { opacity: 1; transform: translateY(0); }
@@ -1600,7 +1536,6 @@ button.calendar-day:focus-visible {
 
 /* Respect the device preference for less motion. */
 @media (prefers-reduced-motion: reduce) {
-  .splash-screen, .splash-logo, .splash-thermal-ring, .splash-title, .splash-subtitle,
   .dashboard-ready .page-heading, .dashboard-ready .summary-card,
   .dashboard-ready .page-sections .page-panel, .sidebar-logo img,
   .connection-status-dot::after {

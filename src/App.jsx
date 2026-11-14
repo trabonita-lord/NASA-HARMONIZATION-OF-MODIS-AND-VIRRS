@@ -1,6 +1,4 @@
-// MAP WORKSPACE: One full-screen map, existing pages in the right-hand panel.
-// Sidebar buttons are written directly below. Appearance: workspace.css.
-// Data loading, monthly filters, date popup, chart, and intro are preserved.
+
 import React, { useEffect, useRef, useState } from 'react';
 import {
   Activity, CalendarDays, GitCompareArrows, Database, Layers,
@@ -173,14 +171,12 @@ export default function App() {
         <header className="workspace-topbar">
           <button className="header-icon-button" type="button" aria-label="Toggle navigation" aria-expanded={navigationOpen} onClick={() => setNavigationOpen(!navigationOpen)}><Menu size={23} /></button>
           <div className="workspace-brand">
-            <img src="/assets/fire_owl.png" alt="TANAW owl" />
-            <div><b>TANAW</b><span>Thermal Activity Watch</span></div>
+            <img src="/assets/tanaw-owl-flame.png" alt="TANAW owl" />
           </div>
           <div className="workspace-header-divider" />
-          <span className="workspace-header-caption">EARTH OBSERVATION / PHILIPPINES</span>
+          <span className="workspace-header-caption">THERMAL AND NETWORK ANALYTICS WATCH</span>
           <div className="workspace-header-actions">
             <span className="workspace-data-status"><i />{configured ? 'DATABASE CONNECTED' : 'SAMPLE MODE'}</span>
-            <button type="button" className="header-text-button" onClick={() => openPage('map')}><Layers size={18} /><span>Layers</span></button>
             <button type="button" className="header-icon-button" aria-label="Open workspace guide" onClick={() => openPage('help')}><CircleHelp size={21} /></button>
           </div>
         </header>
@@ -243,7 +239,7 @@ export default function App() {
                       <p><b>Layers:</b> toggle sensors, background imagery, the coordinate readout, or the latitude/longitude grid.</p>
                       <p><b>Calendar:</b> choose a date to open your existing pie-chart and table popup.</p>
                       <p><b>Fit view:</b> center all fetched observations. Close this panel for an unobstructed map.</p>
-                      <p>Counts describe satellite observations, not unique fires. Blue Marble is a static background; it is not the selected month's fire data.</p>
+                      <p>Counts describe satellite observations, not unique fires. Background imagery is separate from the selected month's observation data.</p>
                     </section>
                   )}
                 </div>
