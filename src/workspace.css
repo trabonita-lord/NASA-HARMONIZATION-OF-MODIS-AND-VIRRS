@@ -1,0 +1,1007 @@
+/* ==================================================
+   FULL MAP WORKSPACE
+   Colors still come from the palette at the top of app.css.
+   Edit these three sizes to change the layout.
+   ================================================== */
+.firms-workspace {
+  --header-height: 68px;
+  --panel-width: 380px;
+  --navigation-width: 68px;
+  /* Header colors: change these three values to recolor the top bar. */
+  --header-color-start: #A52519;
+  --header-color-middle: #741D1A;
+  --header-color-end: #491B23;
+  display: grid;
+  grid-template-rows: var(--header-height) minmax(0, 1fr);
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  color: var(--text-primary);
+  background: var(--page-background);
+}
+
+/* HEADER: FIRMS-inspired structure, with TANAW's own name and logo. */
+.workspace-topbar {
+  display: flex;
+  align-items: center;
+  gap: 17px;
+  min-width: 0;
+  padding: 0 22px 0 16px;
+  background-color: #0B0F19 ;
+  border-bottom: 1px solid rgba(255,255,255,0.13);
+  z-index: 800;
+}
+.workspace-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+.workspace-brand img {
+  width: 46px;
+  height: 46px;
+  object-fit: contain;
+}
+.workspace-brand b {
+  display: block;
+  font-family: Manrope, sans-serif;
+  font-size: 25px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  line-height: 1.1;
+}
+.workspace-brand span {
+  display: block;
+  margin-top: 4px;
+  color: #F1CEC7;
+  font-size: 11px;
+}
+.workspace-header-divider {
+  height: 28px;
+  width: 1px;
+  background: rgba(255,255,255,0.2);
+}
+.workspace-header-caption {
+  color: #F1C6C0;
+  font-size: 9px;
+  letter-spacing: 1.6px;
+}
+.workspace-header-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.header-icon-button, .header-text-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #FFF4F1;
+  padding: 9px;
+}
+.header-icon-button:hover, .header-text-button:hover {
+  background: rgba(255,255,255,0.1);
+}
+.header-text-button {
+  font-size: 12px;
+}
+.workspace-data-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #F6C9C0;
+  font-size: 9px;
+  letter-spacing: 0.8px;
+  white-space: nowrap;
+}
+.workspace-data-status i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #FDBA74;
+}
+
+/* MAP: Fills all available space underneath the header. */
+.map-workspace {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background: #0D2633;
+}
+.map-container.workspace-map {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  margin: 0;
+  border-radius: 0;
+  flex: none;
+  isolation: isolate;
+}
+.workspace-map .leaflet-container {
+  background: #0D2633;
+}
+.workspace-map[data-basemap="satellite"] .leaflet-tile-pane,
+.workspace-map[data-basemap="street"] .leaflet-tile-pane {
+  filter: none;
+}
+.workspace-map[data-basemap="dark"] .leaflet-tile-pane {
+  filter: invert(1) hue-rotate(180deg) brightness(0.72) contrast(0.9) saturate(0.6);
+}
+.workspace-map .leaflet-top.leaflet-left {
+  left: 98px;
+  top: 62px;
+}
+.workspace-map .leaflet-control-zoom {
+  border: 1px solid #4B5E67;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.18);
+}
+.workspace-map .leaflet-control-zoom a {
+  width: 32px;
+  height: 32px;
+  line-height: 32px;
+  background: #152C38;
+  color: #F8FAFC;
+  border-color: #3C505A;
+}
+.workspace-map .leaflet-bottom.leaflet-left {
+  left: 96px;
+  bottom: 17px;
+}
+.workspace-map .leaflet-control-scale-line {
+  border-color: #E0EDF2;
+  background: rgba(10,29,40,0.75);
+  color: #F1F5F9;
+  text-shadow: none;
+}
+.workspace-map .leaflet-control-attribution {
+  font-size: 9px;
+  max-width: 40vw;
+}
+
+/* COORDINATE OVERLAY: Pointer/touch readout and grid degree labels. */
+.coordinate-readout {
+  position: absolute;
+  top: 16px;
+  left: 108px;
+  z-index: 550;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 10px 13px;
+  border: 1px solid rgba(205,232,244,0.18);
+  border-radius: 7px;
+  background: rgba(10,27,38,0.88);
+  color: #EFF8FC;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.12);
+}
+.coordinate-readout small {
+  margin-right: 4px;
+  color: #8BA8B9;
+  font-size: 9px;
+  letter-spacing: 0.7px;
+}
+.coordinate-readout svg {
+  color: #78C9DD;
+}
+.coordinate-grid-label {
+  background: transparent;
+  border: 0;
+}
+.coordinate-grid-label span {
+  display: inline-block;
+  padding: 2px 5px;
+  border-radius: 3px;
+  background: rgba(9,30,41,0.82);
+  color: #E2F8FF;
+  font-size: 9px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.map-period-chip {
+  position: absolute;
+  left: 108px;
+  bottom: 59px;
+  z-index: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: calc(100% - 550px);
+  padding: 8px 11px;
+  border: 1px solid rgba(205,232,244,0.18);
+  border-radius: 6px;
+  background: rgba(10,27,38,0.86);
+  color: #BDCED8;
+  font-size: 9px;
+  letter-spacing: 0.2px;
+}
+.map-period-chip b {
+  color: #FFF;
+  font-weight: 600;
+}
+
+/* LEFT NAVIGATION: Existing pages, presented as a compact map rail. */
+.workspace-rail {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 700;
+  width: var(--navigation-width);
+  display: grid;
+  gap: 4px;
+  padding: 7px;
+  border: 1px solid rgba(197,221,234,0.14);
+  border-radius: 12px;
+  background: rgba(12,25,37,0.95);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.18);
+}
+.rail-button {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  min-height: 58px;
+  padding: 9px 2px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #8FA9BA;
+  transition: color 0.2s, background-color 0.2s;
+}
+.rail-button span {
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.1px;
+}
+.rail-button:hover {
+  color: #F8FAFC;
+  background: #1F3544;
+}
+.rail-button-active {
+  background: #33251F;
+  color: #FFAA69;
+}
+.rail-button-active::before {
+  content: '';
+  position: absolute;
+  left: -7px;
+  top: 13px;
+  bottom: 13px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--accent-orange);
+}
+.rail-separator {
+  height: 1px;
+  margin: 3px 5px;
+  background: #293D4C;
+}
+
+/* RIGHT PANEL: A scrollable drawer; closing it leaves the entire map visible. */
+.workspace-panel {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  bottom: 91px;
+  z-index: 700;
+  display: flex;
+  flex-direction: column;
+  width: var(--panel-width);
+  max-width: calc(100% - 120px);
+  min-height: 0;
+  border: 1px solid #344553;
+  border-radius: 12px;
+  background: var(--surface-background);
+  box-shadow: 0 12px 45px rgba(0,0,0,0.3);
+  overflow: hidden;
+}
+.workspace-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-shrink: 0;
+  padding: 17px 19px;
+  border-bottom: 1px solid var(--surface-border);
+  background: #182331;
+}
+.workspace-panel-header .section-caption {
+  font-size: 8px;
+  color: #8397A8;
+  letter-spacing: 1.4px;
+}
+.workspace-panel-header h1 {
+  margin: 4px 0 0;
+  font-size: 19px;
+  font-family: Manrope, sans-serif;
+  line-height: 1.25;
+  letter-spacing: -0.3px;
+}
+.panel-close-button {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border: 1px solid #324251;
+  border-radius: 7px;
+  background: transparent;
+  color: #A6B9C7;
+}
+.panel-close-button:hover {
+  color: #FFF;
+  background: #2B3B4B;
+}
+.workspace-panel-scroll {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 18px;
+  scrollbar-width: thin;
+  scrollbar-color: #43596A transparent;
+}
+.panel-period {
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--surface-border);
+  margin-bottom: 16px;
+}
+.panel-section-label {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  color: #9AABBA;
+  font-size: 9px;
+  letter-spacing: 1px;
+  font-weight: 700;
+}
+.panel-section-label span {
+  color: #6E879B;
+}
+.workspace-panel .filter-controls {
+  display: grid;
+  grid-template-columns: 34px minmax(0,1fr) 34px;
+  width: 100%;
+  gap: 7px;
+}
+.workspace-panel .filter-controls button, .workspace-panel .filter-controls input, .workspace-panel .filter-controls select {
+  width: 100%;
+  min-width: 0;
+  min-height: 36px;
+  padding: 8px;
+  font-size: 12px;
+  background: #0E1927;
+  border-color: #2D4153;
+}
+.workspace-panel .filter-controls button {
+  display: grid;
+  place-items: center;
+  color: #C6D7E3;
+}
+.workspace-panel .filter-controls select {
+  grid-column: 1 / -1;
+}
+.workspace-panel .summary-cards {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 9px;
+  margin: 0 0 22px;
+}
+.workspace-panel .summary-card {
+  padding: 12px;
+  border-top-width: 2px;
+  border-radius: 8px;
+  background: #101B29;
+  box-shadow: none;
+}
+.workspace-panel .summary-card > span {
+  font-size: 8px;
+  letter-spacing: 0.8px;
+  color: #91A7B8;
+}
+.workspace-panel .summary-card strong {
+  margin: 6px 0 3px;
+  font-size: 25px;
+}
+.workspace-panel .summary-card small {
+  font-size: 9px;
+  color: #708A9F;
+}
+.workspace-panel .page-panel {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.workspace-panel .page-panel h2 {
+  font-size: 15px;
+  margin-bottom: 8px;
+}
+.workspace-panel .page-panel p {
+  font-size: 11px;
+  line-height: 1.75;
+}
+.workspace-panel .calendar-grid {
+  margin-top: 14px;
+  gap: 4px;
+}
+.workspace-panel .calendar-day {
+  padding: 6px;
+  min-height: 55px;
+  font-size: 11px;
+}
+.workspace-panel .calendar-day span {
+  font-size: 10px;
+}
+.workspace-panel .calendar-day b {
+  font-size: 10px;
+}
+.workspace-panel .calendar-weekday {
+  padding: 6px 0;
+  font-size: 9px;
+}
+.workspace-panel .data-source-cards {
+  grid-template-columns: 1fr;
+  gap: 9px;
+  margin: 16px 0;
+}
+.workspace-panel .data-source-cards > div {
+  padding: 12px;
+  font-size: 11px;
+}
+.workspace-panel .info-message {
+  font-size: 11px;
+  padding: 12px;
+}
+.workspace-panel-footer {
+  margin-top: 24px;
+  padding-top: 14px;
+  border-top: 1px solid var(--surface-border);
+  color: #70879A;
+  font-size: 9px;
+  line-height: 1.8;
+}
+.reopen-panel-button {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 14px;
+  border: 1px solid #3B5363;
+  border-radius: 8px;
+  background: #142B3A;
+  color: #E5F1F8;
+  font-size: 11px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+
+/* LAYER SECTIONS: All switches and choices connect to real map controls. */
+.layer-group {
+  margin-top: 20px;
+  border-top: 1px solid var(--surface-border);
+  padding-top: 16px;
+}
+.layer-group:first-child {
+  margin-top: 0;
+  border-top: 0;
+  padding-top: 0;
+}
+.layer-group h3 {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0 0 10px;
+  font-size: 13px;
+  font-weight: 700;
+}
+.layer-group h3 svg {
+  color: #8EAEC2;
+}
+.layer-description {
+  color: #8097A9;
+  font-size: 10px;
+  line-height: 1.7;
+  margin: 8px 0;
+}
+.layer-option {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 55px;
+  padding: 9px 0;
+  border-bottom: 1px solid rgba(54,76,94,0.5);
+  cursor: pointer;
+}
+.layer-option input, .basemap-choice input {
+  accent-color: var(--accent-orange);
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+.layer-option b {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+}
+.layer-option small {
+  display: block;
+  font-size: 9px;
+  color: #7E97AA;
+  margin-top: 4px;
+}
+.layer-count {
+  margin-left: auto;
+  padding: 4px 7px;
+  border-radius: 5px;
+  background: #223243;
+  color: #BCD1DF;
+  font-size: 10px;
+}
+.sensor-swatch {
+  width: 10px;
+  height: 10px;
+  flex-shrink: 0;
+  border-radius: 3px;
+}
+.modis-swatch {
+  background: var(--sensor-modis);
+}
+.viirs-swatch {
+  background: var(--sensor-viirs);
+}
+.basemap-choice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  cursor: pointer;
+  font-size: 11px;
+}
+.basemap-choice small {
+  display: block;
+  font-size: 9px;
+  color: #7E97AA;
+  margin-top: 4px;
+}
+.basemap-thumbnail {
+  width: 43px;
+  height: 33px;
+  flex-shrink: 0;
+  border: 1px solid #496070;
+  border-radius: 5px;
+}
+.satellite-thumbnail {
+  background: radial-gradient(ellipse at 38% 40%, #6D8052 0%, #4E6748 28%, transparent 29%), linear-gradient(135deg,#254F6A,#113448);
+}
+.street-thumbnail {
+  background: repeating-linear-gradient(40deg,transparent 0 10px,#A4B8BF 11px 12px),#CFD9CC;
+}
+.dark-thumbnail {
+  background: repeating-linear-gradient(40deg,transparent 0 10px,#34505C 11px 12px),#122630;
+}
+.coordinate-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+  margin: 12px 0;
+}
+.coordinate-inputs label {
+  color: #8DA4B7;
+  font-size: 10px;
+}
+.coordinate-inputs input {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  margin-top: 6px;
+  padding: 10px;
+  border: 1px solid #334D60;
+  border-radius: 6px;
+  background: #0E1927;
+  color: #E0EDF5;
+  font-size: 12px;
+}
+.workspace-primary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 13px;
+  border: 1px solid #AD5429;
+  border-radius: 7px;
+  background: #3B281E;
+  color: #FFC38D;
+  font-size: 11px;
+  font-weight: 600;
+}
+.workspace-primary-button:hover {
+  background: #533321;
+}
+.location-search .workspace-primary-button {
+  width: 100%;
+}
+.location-error {
+  color: #FFB4A5;
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+/* OVERVIEW AND HELP CONTENT */
+.workspace-overview h2, .workspace-help h2 {
+  margin: 12px 0 9px;
+  font-size: 17px;
+  line-height: 1.4;
+}
+.workspace-overview p, .workspace-help p, .map-panel-introduction p {
+  color: #8FA8BA;
+  font-size: 11px;
+  line-height: 1.85;
+}
+.overview-intro-icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid #725035;
+  border-radius: 10px;
+  background: #33271E;
+  color: #F8B277;
+}
+.workspace-overview > .workspace-primary-button {
+  margin: 8px 0 16px;
+}
+.overview-feature {
+  display: flex;
+  gap: 12px;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--surface-border);
+}
+.overview-feature > svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: #6DB6CD;
+}
+.overview-feature b {
+  display: block;
+  font-size: 11px;
+}
+.overview-feature span {
+  display: block;
+  margin-top: 5px;
+  color: #7D96AA;
+  font-size: 10px;
+  line-height: 1.7;
+}
+.workspace-footnote {
+  color: #6F889C !important;
+  font-size: 10px !important;
+  margin-top: 18px;
+}
+
+/* BOTTOM TOOLBAR AND SENSOR LEGEND */
+.workspace-toolbar {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 700;
+  display: flex;
+  gap: 4px;
+  padding: 5px;
+  border: 1px solid rgba(146,183,205,0.22);
+  border-radius: 11px;
+  background: rgba(10,29,43,0.95);
+  box-shadow: 0 5px 24px rgba(0,0,0,0.25);
+}
+.workspace-toolbar button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: 63px;
+  height: 52px;
+  padding: 5px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #B6CDDD;
+}
+.workspace-toolbar button span {
+  font-size: 8px;
+  letter-spacing: 0.3px;
+}
+.workspace-toolbar button:hover, .workspace-toolbar button[aria-pressed="true"] {
+  background: #243E4D;
+  color: #FFBC85;
+}
+.map-sensor-legend {
+  position: absolute;
+  right: 24px;
+  bottom: 28px;
+  z-index: 600;
+  display: flex;
+  gap: 15px;
+  padding: 8px 12px;
+  background: rgba(10,27,38,0.86);
+  border: 1px solid rgba(205,232,244,0.18);
+  border-radius: 6px;
+}
+.map-sensor-legend span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #BBD0DE;
+  font-size: 9px;
+}
+.map-sensor-legend i {
+  display: block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+.workspace-error, .workspace-warning {
+  position: absolute;
+  top: 62px;
+  left: 150px;
+  z-index: 750;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: min(450px,calc(100% - 570px));
+  padding: 10px 13px;
+  border: 1px solid #8A5634;
+  border-radius: 7px;
+  background: #32261D;
+  color: #FFD8B7;
+  font-size: 11px;
+  line-height: 1.5;
+}
+.workspace-error {
+  border-color: #A74942;
+  background: #3E2025;
+  color: #FFCCC6;
+}
+.workspace-warning button, .workspace-error button {
+  margin-left: auto;
+  flex-shrink: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 11px;
+}
+.map-empty-layer-note {
+  position: absolute;
+  left: 50%;
+  bottom: 98px;
+  transform: translateX(-50%);
+  z-index: 600;
+  padding: 10px 15px;
+  border-radius: 7px;
+  background: rgba(10,27,38,0.9);
+  color: #D6E8F2;
+  font-size: 11px;
+  text-align: center;
+}
+.loading-spinner {
+  animation: workspaceSpin 1s linear infinite;
+}
+.popup-content button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.firms-workspace button:focus-visible, .firms-workspace input:focus-visible, .firms-workspace select:focus-visible {
+  outline: 2px solid #FFB274;
+  outline-offset: 3px;
+}
+@keyframes workspaceSpin { to {
+  transform: rotate(360deg);
+} }
+
+/* TABLET: Keep map controls clear of the right drawer. */
+@media (max-width: 1050px) {
+  .workspace-header-caption, .workspace-header-divider {
+  display: none;
+}
+  .coordinate-readout {
+  gap: 8px;
+  font-size: 10px;
+}
+  .workspace-panel {
+  --panel-width: 340px;
+}
+  .map-sensor-legend {
+  display: none;
+}
+  .workspace-warning, .workspace-error {
+  left: 108px;
+  top: 58px;
+  width: calc(100% - 490px);
+}
+  .map-period-chip {
+  max-width: calc(100% - 490px);
+}
+}
+
+/* PHONE: Side drawer becomes a scrollable bottom sheet, with map still visible. */
+@media (max-width: 700px) {
+  .firms-workspace {
+  --header-height: 60px;
+  --navigation-width: 58px;
+}
+  .workspace-topbar {
+  padding: 0 11px;
+  gap: 9px;
+}
+  .workspace-brand {
+  gap: 7px;
+}
+  .workspace-brand img {
+  width: 38px;
+  height: 38px;
+}
+  .workspace-brand b {
+  font-size: 20px;
+}
+  .workspace-brand span {
+  font-size: 8px;
+}
+  .workspace-header-actions {
+  gap: 4px;
+}
+  .workspace-data-status {
+  display: none;
+}
+  .header-text-button {
+  font-size: 10px;
+}
+  .header-icon-button {
+  padding: 7px;
+}
+  .workspace-rail {
+  top: 12px;
+  left: 10px;
+  padding: 5px;
+  gap: 2px;
+}
+  .rail-button {
+  min-height: 47px;
+  gap: 4px;
+}
+  .rail-button svg {
+  width: 19px;
+  height: 19px;
+}
+  .rail-button span {
+  font-size: 7px;
+}
+  .workspace-map .leaflet-top.leaflet-left {
+  left: auto;
+  right: 12px;
+  top: 64px;
+}
+  .workspace-map .leaflet-bottom.leaflet-left {
+  left: 7px;
+  bottom: 74px;
+}
+  .coordinate-readout {
+  top: 12px;
+  left: 80px;
+  right: 10px;
+  width: auto;
+  padding: 9px;
+  gap: 7px;
+  justify-content: center;
+  font-size: 10px;
+}
+  .coordinate-readout small {
+  font-size: 8px;
+  margin-right: 2px;
+}
+  .coordinate-readout svg {
+  display: none;
+}
+  .map-period-chip {
+  left: 80px;
+  bottom: auto;
+  top: 53px;
+  max-width: calc(100% - 140px);
+  font-size: 8px;
+  padding: 7px 9px;
+}
+  .workspace-panel {
+  left: 80px;
+  right: 10px;
+  top: auto;
+  bottom: 83px;
+  width: auto;
+  height: 52%;
+  max-height: 520px;
+  max-width: none;
+  border-radius: 12px;
+}
+  .workspace-panel-header {
+  padding: 12px 14px;
+}
+  .workspace-panel-header h1 {
+  font-size: 16px;
+}
+  .workspace-panel-scroll {
+  padding: 14px;
+}
+  .workspace-panel .summary-card {
+  padding: 10px;
+}
+  .workspace-panel .summary-card strong {
+  font-size: 22px;
+}
+  .workspace-panel .summary-card > span {
+  font-size: 7px;
+}
+  .workspace-panel .calendar-day {
+  min-height: 42px;
+  padding: 3px;
+}
+  .workspace-panel .calendar-day b {
+  font-size: 8px;
+}
+  .workspace-panel .calendar-weekday {
+  font-size: 8px;
+}
+  .reopen-panel-button {
+  top: auto;
+  bottom: 88px;
+  right: 12px;
+  padding: 9px 12px;
+}
+  .workspace-toolbar {
+  bottom: 12px;
+  gap: 2px;
+  max-width: calc(100% - 24px);
+}
+  .workspace-toolbar button {
+  width: 54px;
+  height: 47px;
+}
+  .workspace-map .leaflet-control-attribution {
+  max-width: 70vw;
+  font-size: 8px;
+}
+  .workspace-warning, .workspace-error {
+  left: 80px;
+  right: 54px;
+  top: 89px;
+  width: auto;
+  font-size: 10px;
+}
+  .map-empty-layer-note {
+  bottom: 70%;
+  width: 60%;
+  font-size: 10px;
+}
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rail-button {
+  transition: none;
+}
+  .loading-spinner {
+  animation: none;
+}
+}

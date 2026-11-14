@@ -1,64 +1,82 @@
-// Edit the map, tiles, marker colors, and marker popups here.
-import React from 'react';
+// One persistent map for the full workspace. All existing observations remain unchanged.
+import React, { useEffect, useState } from 'react';
+import { MapContainer, TileLayer, CircleMarker, Popup, Circle } from 'react-leaflet';
 import { getThemeColors } from '../theme';
-import { MapContainer, TileLayer, CircleMarker, Popup } from 'react-leaflet';
-import FitMap from './FitMap';
+import { validLocation } from '../lib/map-utils';
 import ResizeMap from './ResizeMap';
+import CoordinateGrid from './CoordinateGrid';
+import CoordinateReadout from './CoordinateReadout';
+import { FitObservationView, MapScale } from './MapControls';
 
-export default function FireMap({ records }) {
+export default function FireMap({ records, layers, basemap, mapReference, selectedLocation, onBasemapWarning }) {
   const theme = getThemeColors();
-  // Only place observations with numeric coordinates on the map.
-  function hasValidCoordinates(observation) {
-    const hasLatitude = Number.isFinite(Number(observation.latitude));
-    const hasLongitude = Number.isFinite(Number(observation.longitude));
-    return hasLatitude && hasLongitude;
+  const [failedBasemap, setFailedBasemap] = useState('');
+  useEffect(function resetFallback() { setFailedBasemap(''); }, [basemap]);
+
+  let displayedBasemap = basemap;
+  if (failedBasemap === basemap && basemap === 'satellite') displayedBasemap = 'street';
+
+  let tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+  let attribution = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+  let nativeZoom = 19;
+  if (displayedBasemap === 'satellite') {
+    tileUrl = 'https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/{z}/{y}/{x}.jpeg';
+    attribution = 'Imagery: <a href="https://earthdata.nasa.gov/gibs">NASA GIBS / Blue Marble</a>';
+    nativeZoom = 8;
   }
 
-  const validObservations = records.filter(hasValidCoordinates);
-
-  function getMarkerColor(sensor) {
-    if (sensor === 'MODIS') {
-      return theme.modis;
+  function handleTileError() {
+    if (failedBasemap === basemap) return;
+    setFailedBasemap(basemap);
+    if (basemap === 'satellite') {
+      onBasemapWarning('Satellite imagery could not load. The street map is shown instead.');
+    } else {
+      onBasemapWarning('Background tiles could not load. Check the connection or select another background in Layers.');
     }
-    return theme.viirs;
   }
+
+  const visibleRecords = records.filter(function isVisible(record) {
+    if (!validLocation(record.latitude, record.longitude)) return false;
+    if (record.sensor === 'MODIS') return layers.modis;
+    if (record.sensor === 'VIIRS') return layers.viirs;
+    return false;
+  });
 
   return (
-    <div className="map-container">
+    <div className="map-container workspace-map" data-basemap={displayedBasemap}>
       <MapContainer
+        ref={mapReference}
         center={[12.5, 122.5]}
-        zoom={6}
+        zoom={5}
+        minZoom={2}
+        maxZoom={18}
+        maxBounds={[[-85, -180], [85, 180]]}
+        maxBoundsViscosity={1}
         style={{ height: '100%', width: '100%' }}
-        scrollWheelZoom={false}
+        scrollWheelZoom={true}
       >
-        <TileLayer
-          attribution="&copy; OpenStreetMap contributors"
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-
+        <TileLayer key={displayedBasemap} url={tileUrl} attribution={attribution} maxNativeZoom={nativeZoom} maxZoom={18} noWrap={true} eventHandlers={{ tileerror: handleTileError }} />
         <ResizeMap />
-        <FitMap records={records} />
+        <FitObservationView records={records} />
+        <MapScale />
+        {layers.grid && <CoordinateGrid />}
+        {layers.coordinates && <CoordinateReadout />}
+        {selectedLocation && (
+          <Circle center={selectedLocation} radius={3000} pathOptions={{ color: '#FFFFFF', weight: 2, fillColor: '#FF5722', fillOpacity: 0.3 }} />
+        )}
 
-        {validObservations.map(function drawMarker(observation) {
+        {visibleRecords.map(function drawObservation(record) {
+          let color = theme.viirs;
+          if (record.sensor === 'MODIS') color = theme.modis;
           return (
-            <CircleMarker
-              key={observation.id}
-              center={[observation.latitude, observation.longitude]}
-              radius={4}
-              pathOptions={{
-                color: getMarkerColor(observation.sensor),
-                fillOpacity: 0.7,
-                weight: 1,
-              }}
-            >
+            <CircleMarker key={record.id} center={[Number(record.latitude), Number(record.longitude)]} radius={4} pathOptions={{ color, fillColor: color, fillOpacity: 0.85, weight: 1 }}>
               <Popup>
-                <strong>{observation.sensor}</strong> Â· {observation.satellite}
-                <br />
-                {observation.acq_date}
-                <br />
-                FRP: {observation.frp ?? 'N/A'} MW
-                <br />
-                Confidence: {observation.confidence ?? 'N/A'}
+                <strong>{record.sensor}</strong> · {record.satellite}<br />
+                {record.acq_date}<br />
+                Latitude: {Number(record.latitude).toFixed(4)}<br />
+                Longitude: {Number(record.longitude).toFixed(4)}<br />
+                FRP: {record.frp ?? 'N/A'} MW<br />
+                Confidence: {record.confidence ?? 'N/A'}
               </Popup>
             </CircleMarker>
           );
