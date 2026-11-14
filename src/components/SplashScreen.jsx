@@ -1,131 +1,89 @@
-﻿// VIDEO INTRO: Replaces the previous owl animation; App.jsx still renders one splash.
-// Edit timings below. Styles live only in splash-screen.css.
+﻿// STARTUP INTRO: based on the supplied logo-centered HTML splash.
+// Change these three values to edit the timing; all styling is in splash-screen.css.
 import React, { useEffect, useRef, useState } from 'react';
+import { ArrowRight } from 'lucide-react';
 import './splash-screen.css';
 
-const VIDEO_CUTOFF_SECONDS = 3.8;
-const LOGO_FALLBACK_MS = 4200;
-const FADE_START_MS = 5600;
-const INTRO_FINISH_MS = 6300;
+const MINIMUM_INTRO_MS = 1800;
+const MAXIMUM_WAIT_MS = 6000;
+const EXIT_DURATION_MS = 360;
 
-export default function SplashScreen({ onFinish }) {
-  const videoRef = useRef(null);
-  const timersRef = useRef([]);
-  const phaseRef = useRef('video');
-  const [logoVisible, setLogoVisible] = useState(false);
+export default function SplashScreen({ onFinish, ready = true }) {
+  const [minimumElapsed, setMinimumElapsed] = useState(false);
   const [isLeaving, setIsLeaving] = useState(false);
   const [logoFailed, setLogoFailed] = useState(false);
+  const [logoLoaded, setLogoLoaded] = useState(false);
   const [reducedMotion] = useState(function readMotionPreference() {
-    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    return typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   });
-  const videoUrl = import.meta.env.BASE_URL + 'assets/tanaw-intro.mp4';
-  const logoUrl = import.meta.env.BASE_URL + 'assets/fire_owl.png';
+  const timers = useRef([]);
+  const exitStarted = useRef(false);
+  const completed = useRef(false);
+  const finishCallback = useRef(onFinish);
+  finishCallback.current = onFinish;
+  const logoUrl = import.meta.env.BASE_URL + 'assets/tanaw-owl-flame.png';
 
-  function clearIntroTimers() {
-    timersRef.current.forEach(clearTimeout);
-    timersRef.current = [];
-  }
-
-  function schedule(callback, delay) {
-    timersRef.current.push(setTimeout(callback, delay));
-  }
-
-  function revealLogo() {
-    if (phaseRef.current !== 'video') return;
-    phaseRef.current = 'logo';
-    if (videoRef.current) videoRef.current.pause();
-    setLogoVisible(true);
+  function clearTimers() {
+    timers.current.forEach(clearTimeout);
+    timers.current = [];
   }
 
   function finishIntro() {
-    phaseRef.current = 'finished';
-    clearIntroTimers();
-    onFinish(false);
+    if (completed.current) return;
+    completed.current = true;
+    finishCallback.current(false);
   }
 
-  function handleVideoProgress(event) {
-    if (event.currentTarget.currentTime >= VIDEO_CUTOFF_SECONDS) revealLogo();
+  function leaveIntro() {
+    if (exitStarted.current || completed.current) return;
+    exitStarted.current = true;
+    clearTimers();
+    setIsLeaving(true);
+    timers.current.push(setTimeout(finishIntro, reducedMotion ? 0 : EXIT_DURATION_MS));
   }
 
-  // Missing video or blocked autoplay: show the brand, then release the dashboard.
-  // Repeated browser errors must not restart or extend the intro.
-  function handleVideoError() {
-    if (phaseRef.current !== 'video') return;
-    clearIntroTimers();
-    revealLogo();
-    schedule(function fadeFallback() { setIsLeaving(true); }, 1800);
-    schedule(finishIntro, 2500);
-  }
-
-  useEffect(function playIntro() {
+  useEffect(function startIntro() {
     const previousOverflow = document.body.style.overflow;
-    const video = videoRef.current;
-    let cancelled = false;
-    phaseRef.current = 'video';
     document.body.style.overflow = 'hidden';
-
-    if (reducedMotion) {
-      revealLogo();
-      schedule(finishIntro, 1800);
-    } else {
-      // Wall-clock timers also handle a stalled connection or missing progress events.
-      schedule(revealLogo, LOGO_FALLBACK_MS);
-      schedule(function fadeIntro() { setIsLeaving(true); }, FADE_START_MS);
-      schedule(finishIntro, INTRO_FINISH_MS);
-      if (video) {
-        try {
-          // Explicit play also resumes after React StrictMode's setup/cleanup check.
-          const playback = video.play();
-          if (playback) playback.catch(function playbackBlocked() {
-            if (!cancelled) handleVideoError();
-          });
-        } catch {
-          handleVideoError();
-        }
+    function skipWithEscape(event) {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        leaveIntro();
       }
     }
+    document.addEventListener('keydown', skipWithEscape);
+    timers.current.push(setTimeout(() => setMinimumElapsed(true), reducedMotion ? 0 : MINIMUM_INTRO_MS));
+    // Slow or unavailable data/logo must never leave the workspace behind an endless intro.
+    timers.current.push(setTimeout(leaveIntro, reducedMotion ? 120 : MAXIMUM_WAIT_MS));
 
     return function cleanUpIntro() {
-      cancelled = true;
-      clearIntroTimers();
-      if (video) video.pause();
+      clearTimers();
+      document.removeEventListener('keydown', skipWithEscape);
       document.body.style.overflow = previousOverflow;
     };
-  }, [onFinish, reducedMotion]);
+  }, [reducedMotion]);
 
-  let screenClass = 'splash-screen tanaw-video-intro';
-  if (logoVisible) screenClass += ' tanaw-video-logo-visible';
-  if (isLeaving) screenClass += ' tanaw-video-intro-leaving';
+  useEffect(function handOffWhenReady() {
+    if (ready && minimumElapsed) leaveIntro();
+  }, [ready, minimumElapsed]);
+
+  let screenClass = 'splash-screen tanaw-launch';
+  if (isLeaving) screenClass += ' tanaw-launch-leaving';
 
   return (
-    <div className={screenClass} role="status" aria-live="polite" aria-label="Starting TANAW">
-      <div className="tanaw-intro-backdrop" aria-hidden="true" />
-      {!reducedMotion && (
-        <video
-          ref={videoRef}
-          className="tanaw-intro-video"
-          src={videoUrl}
-          autoPlay
-          muted
-          playsInline
-          preload="auto"
-          aria-hidden="true"
-          onTimeUpdate={handleVideoProgress}
-          onEnded={revealLogo}
-          onError={handleVideoError}
-        />
-      )}
-      <div className="tanaw-intro-vignette" aria-hidden="true" />
-      <div className="splash-logo-lockup">
-        <div className="splash-logo-aura" aria-hidden="true" />
-        {!logoFailed && (
-          <img src={logoUrl} className="splash-logo-image" alt="TANAW fire owl logo"
-            fetchPriority="high" onError={() => setLogoFailed(true)} />
-        )}
-        <div className="splash-brand-rule" aria-hidden="true" />
-        <h1>TANAW</h1>
-        <p>THERMAL ACTIVITY WATCH</p>
-      </div>
+    <div className={screenClass} role="region" aria-label="TANAW introduction">
+      <div className="launch-ambient" aria-hidden="true" />
+      <div className="launch-grid" aria-hidden="true" />
+      <section className="launch-content" aria-label="Opening your workspace">
+        <div className="launch-wordmark">
+          {(!logoLoaded || logoFailed) && <h1>TANAW</h1>}
+          {!logoFailed && <img src={logoUrl} className={logoLoaded ? 'launch-logo-ready' : 'launch-logo-loading'} aria-hidden={!logoLoaded} alt="TANAW - Thermal Activity Network and Analytics Watch" width={870} height={272} fetchPriority="high" decoding="async" onLoad={() => setLogoLoaded(true)} onError={() => setLogoFailed(true)} />}
+        </div>
+        <p className="launch-tagline">THERMAL AND NETWORK ANALYTICS WATCH</p>
+        {/* Decorative activity indicator, not a fabricated data-loading percentage. */}
+        <div className="launch-progress" aria-hidden="true"><span /></div>
+        <p className="launch-status" role="status" aria-live="polite">{isLeaving ? 'Opening your workspace' : 'Preparing the observatory'}</p>
+      </section>
     </div>
   );
 }

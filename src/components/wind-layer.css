@@ -1,0 +1,17 @@
+﻿/* WIND OVERLAY ONLY: arrows point in the direction the wind is blowing toward. */
+.wind-direction-icon { background: transparent; border: 0; }
+.wind-arrow { display: block; width: 20px; height: 20px; margin: 4px; opacity: .88; filter: drop-shadow(0 1px 2px #001522); }
+.wind-arrow svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.wind-arrow path { fill: none; stroke: #9CEEF2; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.wind-calm-dot { position: absolute; left: 11px; top: 11px; width: 6px; height: 6px; border-radius: 50%; border: 1px solid #BFD0DF; background: rgba(16, 40, 61, .7); }
+.wind-overlay-status { position: absolute; left: 108px; bottom: 100px; z-index: 650; display: grid; gap: 5px; width: min(280px, calc(100% - 140px)); padding: 10px 12px; border: 1px solid rgba(170, 211, 228, .3); border-radius: 8px; background: rgba(9, 25, 41, .62); -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px); color: #C4DFEC; font: 10px 'DM Sans', sans-serif; line-height: 1.5; }
+.wind-overlay-status > div { display: flex; align-items: center; gap: 7px; color: #B2F0F1; }
+.wind-overlay-status b { font-size: 11px; font-weight: 600; }
+.wind-overlay-status button { display: grid; place-items: center; margin-left: auto; width: 23px; height: 23px; padding: 0; border: 1px solid #54768A; border-radius: 5px; background: #183347; color: #C8EDF4; }
+.wind-overlay-status button:disabled { opacity: .5; cursor: default; }
+.wind-overlay-status small { color: #8FAFC3; font-size: 9px; }
+.wind-overlay-status a { justify-self: start; color: #9DCCD8; font-size: 9px; }
+.wind-overlay-status button:focus-visible { outline: 2px solid #FFC28D; outline-offset: 2px; }
+.timeline-visible .wind-overlay-status { top: 106px; bottom: auto; }
+.workspace-map .wind-point-popup .leaflet-popup-content { max-width: 240px; font-size: 11px; line-height: 1.7; }
+@media (max-width: 700px) { .wind-overlay-status { left: 80px; bottom: 88px; width: min(250px, calc(100% - 94px)); padding: 8px 10px; } }

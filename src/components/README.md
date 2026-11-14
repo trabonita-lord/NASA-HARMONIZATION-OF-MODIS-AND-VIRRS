@@ -74,19 +74,19 @@ The old Sidebar.jsx, SummaryCards.jsx, Metric.jsx, and navigation.js copies were
 
 ## Dashboard animations
 
-- SplashScreen.jsx: one video intro and TANAW logo reveal on each page refresh (normally 6.3 seconds).
+- SplashScreen.jsx: one logo-centered startup intro per refresh; normally 1.8 seconds plus a 0.36-second fade.
 - CountUpNumber.jsx: 1-second number animation; original values remain unchanged.
 - SidebarHighlight.jsx: moves the active highlight behind the direct buttons in App.jsx.
 - app.css: search DASHBOARD ANIMATIONS for entrance delays, hover, logo glow, and radar effects.
 - App.jsx: showSplash controls the intro; card numbers use CountUpNumber.
-- Reduced-motion preferences skip video and show a still TANAW logo for 1.8 seconds.
+- Reduced-motion preferences disable decorative motion and leave the intro promptly.
 
-## Video splash kit
+## Logo-centered startup intro
 
-- SplashScreen.jsx replaces the old flight intro and is mounted once by App.jsx.
-- splash-screen.css contains all intro styles. Shared dashboard animations stay in app.css.
-- public/assets/tanaw-intro.mp4 is the supplied video; public/assets/fire_owl.png is reused unchanged.
-- Edit VIDEO_CUTOFF_SECONDS, LOGO_FALLBACK_MS, FADE_START_MS, and INTRO_FINISH_MS at the top of SplashScreen.jsx to adjust timing.
-- Video errors or blocked autoplay reveal the logo and continue automatically. Stalled playback cannot block the dashboard.
-- Timers are cleared and body scrolling restored on unmount. React StrictMode restarts playback safely.
-- No additional splash component, App state, library, or backend was added.
+- SplashScreen.jsx replaces the video intro with the centered wordmark from the supplied HTML splash. App.jsx mounts one instance.
+- splash-screen.css contains the entire intro design: subtle thermal background, logo reveal, decorative loading line, and fade.
+- The existing public/assets/tanaw-owl-flame.png wordmark is reused. The video is no longer requested by the intro.
+- MINIMUM_INTRO_MS = 1800; MAXIMUM_WAIT_MS = 6000; EXIT_DURATION_MS = 360.
+- ready from App.jsx permits handoff after the minimum duration. Continue and Escape skip the wait. The maximum wait prevents an endless intro.
+- The moving line is a decorative activity indicator, not a fabricated progress percentage.
+- A missing logo falls back to a text wordmark. Timers, keyboard listeners, and scrolling are restored on unmount.

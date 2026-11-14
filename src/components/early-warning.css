@@ -1,0 +1,39 @@
+﻿/* EARLY WARNING PAGE ONLY: these styles do not change the map or other pages. */
+.early-warning-page { display: grid; gap: 14px; }
+.early-warning-page .warning-introduction { margin: 0; color: #9FB3C5; font-size: 11px; line-height: 1.8; }
+.warning-refresh-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.warning-source-badge { padding: 5px 7px; border: 1px solid #4D6175; border-radius: 5px; background: #1A2B3B; color: #B9D1E2; font-size: 8px; font-weight: 700; letter-spacing: .5px; }
+.warning-refresh-row button { display: inline-flex; align-items: center; gap: 5px; padding: 6px 8px; border: 1px solid #3E5970; border-radius: 6px; background: #172C3E; color: #CBE0EF; font-size: 10px; }
+.warning-refresh-row button:disabled { opacity: .5; cursor: default; }
+.warning-data-time { margin: -5px 0 0; color: #839DB2; font-size: 9px; line-height: 1.7; }
+.warning-location-controls { display: grid; gap: 10px; }
+.warning-location-controls > div { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.warning-location-controls label { display: grid; gap: 5px; color: #ADC3D4; font-size: 10px; min-width: 0; }
+.warning-location-controls select { width: 100%; min-width: 0; padding: 8px; border: 1px solid #344D62; border-radius: 6px; background: #101F30; color: #E4EDF6; font-size: 11px; }
+.warning-outline-button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 8px; border: 1px solid #7D5738; border-radius: 6px; background: #33271F; color: #FFC28D; font-size: 10px; }
+.warning-section { min-width: 0; padding: 14px; border: 1px solid #36495E; border-radius: 10px; background: #102030; }
+.warning-section-title { display: flex; align-items: center; gap: 8px; margin-bottom: 9px; }
+.warning-section-title > svg { color: #F6AE77; flex-shrink: 0; }
+.warning-section-title h2 { margin: 0; color: #ECF3F9; font-size: 13px; }
+.warning-count { margin-left: auto; padding: 3px 7px; border-radius: 5px; background: #2A3B50; color: #D5E4F0; font-size: 11px; }
+.warning-section-status { display: inline-block; margin-bottom: 12px; padding: 5px 7px; border: 1px solid #5C526F; border-radius: 5px; background: #29233B; color: #D9C6F0; font-size: 9px; }
+.warning-weather-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+.warning-weather-factor { min-width: 0; display: grid; gap: 5px; padding: 11px 9px; border: 1px solid #304B60; border-radius: 7px; background: #122A3C; }
+.warning-weather-factor > svg { color: #8FC9DF; }
+.warning-weather-factor > span { color: #B3CBDA; font-size: 9px; }
+.warning-weather-factor strong { color: #F2F7FA; font-size: 22px; font-weight: 600; }
+.warning-weather-factor strong small { margin-left: 4px; color: #A2BACD; font-size: 9px; font-weight: 400; }
+.warning-weather-factor em { color: #819CAF; font-size: 8px; font-style: normal; }
+.warning-factor-flagged { border-color: #AA683B; background: #342A22; }
+.warning-factor-flagged > svg, .warning-factor-flagged em { color: #FFBD82; }
+.warning-note { margin: 8px 0 0; color: #8FA9BD; font-size: 9px; line-height: 1.75; }
+.warning-empty { margin: 10px 0 0; padding: 10px; border: 1px dashed #42586C; border-radius: 6px; color: #A9BECE; font-size: 10px; line-height: 1.7; }
+.warning-information { padding: 10px; border: 1px solid #425C6F; border-radius: 7px; background: #1B2B3B; color: #BED1DF; font-size: 10px; line-height: 1.7; }
+.warning-error { margin: 8px 0; padding: 9px; border: 1px solid #8F5049; border-radius: 6px; background: #3A2528; color: #F2C6BE; font-size: 10px; line-height: 1.6; }
+.warning-observation-list { display: grid; gap: 8px; margin: 12px 0 0; padding: 0; list-style: none; }
+.warning-observation-list li { display: grid; gap: 8px; padding: 10px; border: 1px solid #3B5066; border-radius: 7px; background: #152A3B; }
+.warning-observation-list li > div { display: grid; gap: 4px; }
+.warning-observation-list b { color: #DCEAF3; font-size: 10px; }
+.warning-observation-list span, .warning-observation-list time { color: #9DB7C8; font-size: 9px; line-height: 1.6; }
+.warning-observation-list button { justify-self: start; padding: 5px 8px; border: 1px solid #8F613D; border-radius: 5px; background: #3B2B20; color: #FFC393; font-size: 9px; }
+.early-warning-page button:focus-visible, .early-warning-page select:focus-visible { outline: 2px solid #FFC28D; outline-offset: 2px; }
