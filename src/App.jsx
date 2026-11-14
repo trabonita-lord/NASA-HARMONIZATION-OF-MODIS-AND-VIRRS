@@ -5,7 +5,13 @@
 // Popup, chart, map, and calendar content stay in src/components.
 
 import React, { useEffect, useState } from 'react';
-import { Activity, MapPinned, CalendarDays, GitCompareArrows, Database } from 'lucide-react';
+import {
+  Activity,
+  MapPinned,
+  CalendarDays,
+  GitCompareArrows,
+  Database,
+} from 'lucide-react';
 import { loadSummary, loadCalendar } from './lib/data';
 import { configured } from './lib/supabase';
 import TopBar from './components/TopBar';
@@ -23,8 +29,6 @@ import SidebarHighlight from './components/SidebarHighlight';
 
 export default function App() {
   // 1. SELECTIONS AND DATA
-  // useState remembers a value. Its set... function changes that value.
-  // The splash appears on every full page load or refresh.
   const [showSplash, setShowSplash] = useState(true);
   const [page, setPage] = useState('overview');
   const [month, setMonth] = useState('2026-11');
@@ -35,7 +39,6 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [selectedDate, setSelectedDate] = useState(null);
-  const [showPopup, setShowPopup] = useState(false);
 
   // 2. DATE RANGE FOR THE SELECTED MONTH
   const monthParts = month.split('-');
@@ -46,12 +49,12 @@ export default function App() {
   const endDate = lastDay.toISOString().slice(0, 10);
 
   // Close the date popup when the page or filters change.
-  useEffect(function closePopupAfterSelectionChanges() {
+  useEffect(() => {
     setSelectedDate(null);
   }, [month, sensor, page]);
 
-  // 3. EXISTING DATA LOADING
-  useEffect(function loadSelectedMonth() {
+  // 3. DATA LOADING
+  useEffect(() => {
     let isCurrentRequest = true;
 
     async function loadData() {
@@ -84,8 +87,7 @@ export default function App() {
 
     loadData();
 
-    // Ignore an old response if the user has already changed the filters.
-    return function stopOldRequest() {
+    return () => {
       isCurrentRequest = false;
     };
   }, [startDate, endDate, sensor]);
@@ -97,16 +99,16 @@ export default function App() {
 
   for (const observation of records) {
     if (observation.sensor === 'MODIS') {
-      modis = modis + 1;
+      modis += 1;
     }
     if (observation.sensor === 'VIIRS') {
-      viirs = viirs + 1;
+      viirs += 1;
     }
   }
 
   for (const date in counts) {
     if (counts[date] > 0) {
-      days = days + 1;
+      days += 1;
     }
   }
 
@@ -118,10 +120,7 @@ export default function App() {
   function openSources() { setPage('sources'); }
 
   function getButtonClass(buttonPage) {
-    if (page === buttonPage) {
-      return 'sidebar-button sidebar-button-active';
-    }
-    return 'sidebar-button';
+    return page === buttonPage ? 'sidebar-button sidebar-button-active' : 'sidebar-button';
   }
 
   function closeDatePopup() {
@@ -164,174 +163,147 @@ export default function App() {
     pageContent = <SourcesPage />;
   }
 
-  // 7. CHOOSE WHETHER TO SHOW MESSAGES AND THE POPUP
   const hasMessages = !configured || Boolean(error) || loading;
   let contentClass = 'page-content';
   if (hasMessages) {
     contentClass = 'page-content page-content-with-notices';
   }
 
-  let popupContent = null;
-  if (selectedDate) {
-    popupContent = <DatePopup date={selectedDate} onClose={closeDatePopup} />;
-  }
+  const popupContent = selectedDate ? (
+    <DatePopup date={selectedDate} onClose={closeDatePopup} />
+  ) : null;
 
-
-  let dashboardClass = 'app-layout dashboard-waiting';
-  if (!showSplash) {
-    dashboardClass = 'app-layout dashboard-ready';
-  }
-
+  const dashboardClass = showSplash ? 'app-layout dashboard-waiting' : 'app-layout dashboard-ready';
   const animateNumbers = !showSplash && !loading;
 
-  // 8. VISIBLE LAYOUT: Edit the sidebar and small boxes below.
+  // 8. VISIBLE LAYOUT
   return (
     <>
       {showSplash && <SplashScreen onFinish={setShowSplash} />}
       <div className={dashboardClass} inert={showSplash}>
-      {/* SIDEBAR: Edit the logo, button text, and icons directly here. */}
-      <div className="sidebar">
-        <div className="sidebar-logo">
-          <img src="/assets/tanaw-owl-flame.png" alt="TANAW logo" />
-          <div>
-            <small>THERMAL ACTIVITY WATCH</small>
+        <div className="sidebar">
+          <div className="sidebar-logo">
+            <img src="/assets/tanaw-owl-flame.png" alt="TANAW logo" />
+            <div>
+              <small>THERMAL ACTIVITY WATCH</small>
+            </div>
+          </div>
+
+          <div className="sidebar-caption">OBSERVATORY / PH</div>
+
+          <nav aria-label="Main navigation">
+            <SidebarHighlight page={page} />
+
+            <button
+              type="button"
+              className={getButtonClass('overview')}
+              onClick={openOverview}
+            >
+              <Activity size={17} />
+              <span>Overview</span>
+              <small>01</small>
+            </button>
+
+            <button
+              type="button"
+              className={getButtonClass('map')}
+              onClick={openMap}
+            >
+              <MapPinned size={17} />
+              <span>Fire hotspot map</span>
+              <small>02</small>
+            </button>
+
+            <button
+              type="button"
+              className={getButtonClass('calendar')}
+              onClick={openCalendar}
+            >
+              <CalendarDays size={17} />
+              <span>Activity calendar</span>
+              <small>03</small>
+            </button>
+
+            <button
+              type="button"
+              className={getButtonClass('compare')}
+              onClick={openComparison}
+            >
+              <GitCompareArrows size={17} />
+              <span>Sensor comparison</span>
+              <small>04</small>
+            </button>
+
+            <button
+              type="button"
+              className={getButtonClass('sources')}
+              onClick={openSources}
+            >
+              <Database size={17} />
+              <span>Data &amp; methodology</span>
+              <small>05</small>
+            </button>
+          </nav>
+
+          <div className="sidebar-profile">
+            <img src="/assets/fire_owl.png" alt="Profile picture" className="sidebar-avatar" />
+            <div>
+              <b>TANAW Research</b>
+              <small>NASA Space Apps / Prototype</small>
+            </div>
           </div>
         </div>
 
-        <div className="sidebar-caption">OBSERVATORY / PH</div>
+        <main>
+          <TopBar title={pageTitle} configured={configured} />
 
-        {/* Each button opens the page named in setPage(...). */}
-        <nav aria-label="Main navigation">
-          <SidebarHighlight page={page} />
-          {/* BUTTON 1: Overview */}
-          <button
-            type="button"
-            className={getButtonClass('overview')}
-            onClick={openOverview}
-          >
-            <Activity size={17} />
-            <span>Overview</span>
-            <small>01</small>
-          </button>
+          <div className={contentClass}>
+            <PageHeader
+              title={pageTitle}
+              month={month}
+              sensor={sensor}
+              onMonthChange={setMonth}
+              onSensorChange={setSensor}
+              onChangeMonth={changeMonth}
+            />
 
-          {/* BUTTON 2: Map */}
-          <button
-            type="button"
-            className={getButtonClass('map')}
-            onClick={openMap}
-          >
-            <MapPinned size={17} />
-            <span>Fire hotspot map</span>
-            <small>02</small>
-          </button>
+            <div className="summary-cards">
+              <div className="summary-card summary-card-total">
+                <span>OBSERVATIONS IN PERIOD</span>
+                <strong>
+                  <CountUpNumber value={total} enabled={animateNumbers} delay={100} />
+                </strong>
+                <small>Raw satellite detections</small>
+              </div>
 
-          {/* BUTTON 3: Calendar */}
-          <button
-            type="button"
-            className={getButtonClass('calendar')}
-            onClick={openCalendar}
-          >
-            <CalendarDays size={17} />
-            <span>Activity calendar</span>
-            <small>03</small>
-          </button>
+              <div className="summary-card summary-card-modis">
+                <span>MODIS (DISPLAYED)</span>
+                <strong>
+                  <CountUpNumber value={modis} enabled={animateNumbers} delay={200} />
+                </strong>
+                <small>Up to 1,500 rows fetched</small>
+              </div>
 
-          {/* BUTTON 4: Sensor comparison */}
-          <button
-            type="button"
-            className={getButtonClass('compare')}
-            onClick={openComparison}
-          >
-            <GitCompareArrows size={17} />
-            <span>Sensor comparison</span>
-            <small>04</small>
-          </button>
+              <div className="summary-card summary-card-viirs">
+                <span>VIIRS (DISPLAYED)</span>
+                <strong>
+                  <CountUpNumber value={viirs} enabled={animateNumbers} delay={300} />
+                </strong>
+                <small>Up to 1,500 rows fetched</small>
+              </div>
 
-          {/* BUTTON 5: Data and methodology */}
-          <button
-            type="button"
-            className={getButtonClass('sources')}
-            onClick={openSources}
-          >
-            <Database size={17} />
-            <span>Data &amp; methodology</span>
-            <small>05</small>
-          </button>
+              <div className="summary-card summary-card-days">
+                <span>ACTIVE DAYS</span>
+                <strong>{days}</strong>
+                <small>Days with one or more observations</small>
+              </div>
+            </div>
 
-          <button
-          type="button"
-          className="sidebar-button">
-
-          </button>
-        </nav>
-        <div className="sidebar-profile">
-          <img src="./dist/assets/fire_owl.png" alt="Profile picture" className="sidebar-avatar" />
-          <div>
-            <b>TANAW Research</b>
-            <small>NASA Space Apps / Prototype</small>
+            <div className="page-sections">{pageContent}</div>
+            <Footer />
           </div>
-        </div>
-      </div>
-
-      <main>
-        <TopBar title={pageTitle} configured={configured} />
-
-        <div className={contentClass}>
-          {/* GRID AREA: heading. Change its position in app.css under CONTENT GRID. */}
-          <PageHeader
-            title={pageTitle}
-            month={month}
-            sensor={sensor}
-            onMonthChange={setMonth}
-            onSensorChange={setSensor}
-            onChangeMonth={changeMonth}
-          />
-
-      
-
-          {/* GRID AREA: metrics. The four summary cards. */}
-          {/* SUMMARY BOX GRID: Move these four divs to change their order.
-              In app.css, .summary-cards controls columns and spacing. */}
-          <div className="summary-cards">
-            {/* BOX 1: Total observations */}
-            <div className="summary-card summary-card-total">
-              <span>OBSERVATIONS IN PERIOD</span>
-              <strong><CountUpNumber value={total} enabled={animateNumbers} delay={100} /></strong>
-              <small>Raw satellite detections</small>
-            </div>
-
-            {/* BOX 2: MODIS observations */}
-            <div className="summary-card summary-card-modis">
-              <span>MODIS (DISPLAYED)</span>
-              <strong><CountUpNumber value={modis} enabled={animateNumbers} delay={200} /></strong>
-              <small>Up to 1,500 rows fetched</small>
-            </div>
-
-            {/* BOX 3: VIIRS observations */}
-            <div className="summary-card summary-card-viirs">
-              <span>VIIRS (DISPLAYED)</span>
-              <strong><CountUpNumber value={viirs} enabled={animateNumbers} delay={300} /></strong>
-              <small>Up to 1,500 rows fetched</small>
-            </div>
-
-            {/* BOX 4: Active days */}
-            <div className="summary-card summary-card-days">
-              <span>ACTIVE DAYS</span>
-              <strong>{days}</strong>
-              <small>Days with one or more observations</small>
-            </div>
-          </div>
-
-          {/* PAGE PANELS: Only the selected page is displayed. */}
-          <div className="page-sections">
-            {pageContent}
-          </div>
-
-          {/* GRID AREA: footer. Project attribution. */}
-          <Footer />
-        </div>
-        {popupContent}
-      </main>
+          {popupContent}
+        </main>
       </div>
     </>
   );
