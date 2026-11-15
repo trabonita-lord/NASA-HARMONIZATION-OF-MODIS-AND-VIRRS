@@ -1,9 +1,34 @@
-// Edit the compare page content here.
-import React from 'react';
+
+import React, { useEffect, useState } from 'react';
 import { GitCompareArrows, ShieldCheck } from 'lucide-react';
+import { loadHarmonizationSummary } from '../lib/harmonization';
 
 export default function ComparisonPage({ modis, viirs }) {
-  // Compare both bars against the larger observation count.
+  const [summary, setSummary] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadData() {
+      try {
+        const result = await loadHarmonizationSummary();
+        if (active) setSummary(result);
+      } catch (err) {
+        if (active) setError(err.message);
+      } finally {
+        if (active) setLoading(false);
+      }
+    }
+
+    loadData();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const largestCount = Math.max(1, modis, viirs);
   const modisWidth = (modis / largestCount) * 100;
   const viirsWidth = (viirs / largestCount) * 100;
@@ -21,35 +46,115 @@ export default function ComparisonPage({ modis, viirs }) {
       </p>
 
       <div className="sensor-comparison-bars">
-        {/* MODIS BAR: Edit its label and color here. */}
         <div>
           <div className="sensor-comparison-label">
             <b>MODIS</b>
             <span>{modis.toLocaleString()}</span>
           </div>
           <div className="sensor-comparison-track">
-            <div style={{ width: modisWidth + '%', background: 'var(--sensor-modis)' }} />
+            <div
+              style={{
+                width: modisWidth + '%',
+                background: 'var(--sensor-modis)',
+              }}
+            />
           </div>
         </div>
 
-        {/* VIIRS BAR: Edit its label and color here. */}
         <div>
           <div className="sensor-comparison-label">
             <b>VIIRS</b>
             <span>{viirs.toLocaleString()}</span>
           </div>
           <div className="sensor-comparison-track">
-            <div style={{ width: viirsWidth + '%', background: 'var(--sensor-viirs)' }} />
+            <div
+              style={{
+                width: viirsWidth + '%',
+                background: 'var(--sensor-viirs)',
+              }}
+            />
           </div>
         </div>
       </div>
 
       <div className="info-message">
-        <ShieldCheck size={18} /> MODIS confidence is numeric
-        (0â€“100); VIIRS confidence is categorical
-        (low/nominal/high). These scales are not interchangeable.
-        Proximity between detections alone does not prove a
-        single fire.
+        <ShieldCheck size={18} />
+        <span>
+          MODIS confidence is numeric (0–100); VIIRS confidence
+          is categorical (low/nominal/high). These scales are
+          not interchangeable. Proximity between detections
+          alone does not prove a single fire.
+        </span>
+      </div>
+
+      <div style={{ marginTop: '24px' }}>
+        <h2>
+          <GitCompareArrows size={18} />
+          {' '}MODIS–VIIRS Harmonization
+        </h2>
+
+        <p>
+          Spatial-temporal candidate matching within 5 km
+          and 60 minutes. Statistics cover the complete
+          imported 2026 dataset, not just the selected month.
+        </p>
+
+        {loading && (
+          <p role="status">Loading harmonization statistics...</p>
+        )}
+
+        {error && (
+          <p role="alert">
+            Unable to load harmonization data: {error}
+          </p>
+        )}
+
+        {!loading && !error && summary && (
+          <>
+            <div className="summary-cards">
+              <div className="summary-card">
+                <span>CANDIDATE PAIRS</span>
+                <strong>
+                  {summary.totalMatches.toLocaleString()}
+                </strong>
+              </div>
+
+              <div className="summary-card">
+                <span>UNIQUE MODIS</span>
+                <strong>
+                  {summary.uniqueModis.toLocaleString()}
+                </strong>
+              </div>
+
+              <div className="summary-card">
+                <span>UNIQUE VIIRS</span>
+                <strong>
+                  {summary.uniqueViirs.toLocaleString()}
+                </strong>
+              </div>
+            </div>
+
+            <p>
+              <strong>Average separation:</strong>{' '}
+              {summary.averageDistanceKm.toFixed(3)} km
+            </p>
+
+            <p>
+              <strong>Average time difference:</strong>{' '}
+              {summary.averageTimeMinutes.toFixed(2)} minutes
+            </p>
+
+            <div className="info-message">
+              <ShieldCheck size={18} />
+              <span>
+                Candidate pairs indicate observations that
+                are close in space and time. They are not
+                confirmed unique fires or validated detections
+                of the same fire.
+              </span>
+            </div>
+          </>
+        )}
       </div>
     </section>
   );
