@@ -2,6 +2,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { BarChart3, Map, BellRing, CalendarDays, Database, ArrowUpRight, RefreshCcw } from 'lucide-react';
 import DashboardCharts from './DashboardCharts';
+import HistoricalWeatherExplorer from './HistoricalWeatherExplorer';
 import useDashboardData from '../hooks/useDashboardData';
 import { readSavedLocations, SAVED_LOCATIONS_KEY } from '../lib/location-tools';
 import { REFERENCE_START, REFERENCE_END, STUDY_AREA_ID, dashboardArea, calculateDashboard, validComparisonWindow } from '../lib/dashboard-statistics';
@@ -84,6 +85,10 @@ export default function DashboardPage({ onNavigate }) {
         </>}
 
         <DashboardCharts months={model.months} method={method} sample={data.sample} />
+        <HistoricalWeatherExplorer
+          records={data.records}
+          sample={data.sample}
+        />
         <section className="dashboard-card dashboard-table-card"><div className="dashboard-card-heading"><h2>Monthly comparison table</h2><span>Click a month to compare that window</span></div><div className="dashboard-table-scroll"><table><caption>MODIS/VIIRS loaded observations and {methodLabel.toLowerCase()} within-range reference. November ends on {REFERENCE_END}. † marks partial source counts; — means no count with confirmed coverage. N/A is unavailable or a percentage with a zero reference.</caption><thead><tr><th scope="col">Month 2026</th><th scope="col">Days</th><th scope="col">MODIS</th><th scope="col">VIIRS</th><th scope="col">Loaded total</th><th scope="col">Reference expected</th><th scope="col">Difference</th><th scope="col">Difference %</th></tr></thead><tbody>{model.months.map(month => <tr key={month.label} className={start === month.start && end === month.end ? 'dashboard-selected-row' : ''}><th scope="row"><button type="button" aria-label={'Compare ' + month.label + ' 2026'} onClick={() => compareMonth(month)}>{month.label}{month.label === 'Nov' ? ` 1-${Number(month.end.slice(8))}` : ''}</button></th><td>{month.days}</td><td className="dashboard-modis-value">{tableCount(month.counts.MODIS, month.complete.MODIS)}</td><td className="dashboard-viirs-value">{tableCount(month.counts.VIIRS, month.complete.VIIRS)}</td><td>{tableCount(month.counts.total, month.complete.total)}</td><td>{number(month.expected.total, 2)}</td><td>{signed(month.difference.count)}</td><td>{month.difference.percent == null ? 'N/A' : signed(month.difference.percent) + '%'}</td></tr>)}</tbody></table></div></section>
         <p className="dashboard-note">Counts represent satellite observations, not unique fires. Missing dates are not treated as verified zero activity in live comparisons. Source coverage must be declared before live reference values are calculated. Mean/median daily rates use all declared days, including genuine zero-count days.</p>
       </>}
