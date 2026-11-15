@@ -76,8 +76,6 @@ export default function EarlyWarningPage({ onOpenLocations, onViewOnMap }) {
           return <div className="warning-weather-factor" key={factor.field}><Icon size={16} /><span>{factor.title}</span><strong>{value == null ? 'Unavailable' : `${factor.field === 'dry_days' && weather.dry_days_lower_bound ? 'at least ' : ''}${factor.field === 'dry_days' ? value : value.toFixed(1)}`}<small>{factor.unit}</small></strong></div>;
         })}</div>
         <p className="warning-note">Wind from: {weather?.wind_direction_label && weather?.wind_speed_kmh > 0 ? `${weather.wind_direction_label} (${weather.wind_direction_deg.toFixed(0)}\u00b0)` : 'Unavailable / calm'} (meteorological origin). Wind alone does not establish fire spread direction.</p>
-        <p className="warning-note">Last weather estimate: {formatWarningTime(weather?.observedAt)} / {weatherFreshness}. Freshness limit: {MONITORING_CRITERIA.weatherMaxAgeHours} hours.<br />
-          <a href="https://open-meteo.com/en/docs" target="_blank" rel="noreferrer">Open-Meteo Weather API</a>: current and recent model estimates, not station measurements or satellite brightness temperatures. Precipitation date: {weather?.rainfall_date || 'Unavailable'} UTC. Dry days use up to 14 completed UTC days; at least means the run may be longer. A missing day makes the dry-day total unavailable.</p>
       </section>
 
       <section className="warning-section" aria-label="Explainable monitoring indicators">
