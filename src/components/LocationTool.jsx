@@ -171,6 +171,13 @@ export default function LocationTool({ open, onClose }) {
     }
   }
 
+  function removeLocationFlag(key) {
+    const next = selected.filter(item => item.key !== key);
+    setSelected(next);
+    if (activeKey === key) setActiveKey(next[next.length - 1]?.key || '');
+    setNotice('Flag removed from the map. The saved location is still available in Saved Locations.');
+  }
+
   function clearSelections() {
     cancelRequest();
     setBusy(false);
@@ -206,7 +213,7 @@ export default function LocationTool({ open, onClose }) {
       )}
       {/* Keep address cards above the floating tool on smaller screens. */}
       <Pane name="location-cards" style={{ zIndex: 900 }} />
-      {selected.map(place => <LocationPin key={place.key} place={place} active={activeKey === place.key} selectionVersion={selectionVersion} saved={saved.some(item => item.key === place.key)} onSave={saveLocation} />)}
+      {selected.map(place => <LocationPin key={place.key} place={place} active={activeKey === place.key} selectionVersion={selectionVersion} saved={saved.some(item => item.key === place.key)} onSave={saveLocation} onRemove={removeLocationFlag} />)}
     </>
   );
 }

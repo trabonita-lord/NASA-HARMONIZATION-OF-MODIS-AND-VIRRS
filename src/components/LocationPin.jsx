@@ -1,7 +1,8 @@
 // Theme-colored location flag and compact glass address card. Observation markers stay unchanged.
 import React, { useEffect, useRef } from 'react';
 import { Marker, Popup } from 'react-leaflet';
-import { divIcon } from 'leaflet';
+import { X } from 'lucide-react';
+import { divIcon, DomEvent } from 'leaflet';
 
 const locationIcon = divIcon({
   className: 'location-pin-icon',
@@ -12,7 +13,7 @@ const locationIcon = divIcon({
   popupAnchor: [8, -30],
 });
 
-export default function LocationPin({ place, active, selectionVersion, saved, onSave }) {
+export default function LocationPin({ place, active, selectionVersion, saved, onSave, onRemove }) {
   const markerRef = useRef(null);
   useEffect(function openSelectedCard() {
     if (active && markerRef.current) markerRef.current.openPopup();
@@ -26,6 +27,9 @@ export default function LocationPin({ place, active, selectionVersion, saved, on
         <div className="location-card-coordinates">Lat: {place.latitude.toFixed(4)}, Lon: {place.longitude.toFixed(4)}</div>
         <button type="button" className="location-action-button" disabled={saved} onClick={() => onSave(place)}>
           {saved ? 'LOCATION SAVED' : '+ SAVE LOCATION'}
+        </button>
+        <button type="button" className="location-remove-flag-button" onClick={event => { event.preventDefault(); DomEvent.stopPropagation(event.nativeEvent); onRemove(place.key); }} aria-label={'Remove flag for ' + place.title}>
+          <X size={14} /> Remove flag from map
         </button>
       </Popup>
     </Marker>

@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   Activity, CalendarDays, GitCompareArrows, Database, Layers,
   PanelRightClose, PanelRightOpen, Menu, Crosshair, CircleHelp, X, RefreshCcw,
-  Satellite, ChevronRight, Maximize2, Grid2X2, MapPin, Clock3, BellRing, LayoutDashboard,
+  Satellite, ChevronRight, Maximize2, Grid2X2, MapPin, Clock3, BellRing, LayoutDashboard, Ruler,
 } from 'lucide-react';
 import { loadSummary, loadCalendar } from './lib/data';
 import { configured } from './lib/supabase';
@@ -53,6 +53,7 @@ export default function App() {
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [mapWarning, setMapWarning] = useState('');
   const [locationToolOpen, setLocationToolOpen] = useState(false);
+  const [areaMeasureOpen, setAreaMeasureOpen] = useState(false);
   // Timeline selections affect the map; existing monthly dashboard data is kept separate.
   const [timelineOpen, setTimelineOpen] = useState(sharedView?.timelineOpen || false);
   const [timelineDate, setTimelineDate] = useState(sharedView?.timelineDate || HISTORY_END);
@@ -77,6 +78,7 @@ export default function App() {
       setTimelineDays(view.timelineDays);
       setPanelOpen(false);
       setLocationToolOpen(false);
+      setAreaMeasureOpen(false);
       setSelectedDate(null);
       setShowPopup(false);
       mapReference.current?.setView(view.center, view.zoom, { animate: false });
@@ -140,6 +142,7 @@ export default function App() {
   function openPage(nextPage) {
     setTimelineOpen(false);
     setLocationToolOpen(false);
+    setAreaMeasureOpen(false);
     setPage(nextPage);
     setPanelOpen(true);
   }
@@ -185,7 +188,7 @@ export default function App() {
   }
   function toggleTimeline() {
     setTimelineOpen(!timelineOpen);
-    if (!timelineOpen) { setPanelOpen(false); setLocationToolOpen(false); }
+    if (!timelineOpen) { setPanelOpen(false); setLocationToolOpen(false); setAreaMeasureOpen(false); }
   }
   function railClass(name) {
     if (page === name && (name === 'dashboard' || panelOpen)) return 'rail-button rail-button-active';
@@ -253,7 +256,7 @@ export default function App() {
 
           {page === 'dashboard' ? <DashboardPage onNavigate={openPage} /> : (<>
           {/* FULL-SCREEN MAP: Shared by the map panels; removed on Dashboard. */}
-          <FireMap records={mapRecords} sharedView={sharedView} timelineActive={timelineOpen} layers={layers} basemap={basemap} mapReference={mapReference} selectedLocation={selectedLocation} onBasemapWarning={setMapWarning} locationToolOpen={locationToolOpen} onCloseLocationTool={() => setLocationToolOpen(false)} />
+          <FireMap records={mapRecords} sharedView={sharedView} timelineActive={timelineOpen} layers={layers} basemap={basemap} mapReference={mapReference} selectedLocation={selectedLocation} onBasemapWarning={setMapWarning} locationToolOpen={locationToolOpen} onCloseLocationTool={() => setLocationToolOpen(false)} areaMeasureOpen={areaMeasureOpen} onCloseAreaMeasure={() => setAreaMeasureOpen(false)} />
 
           {/* MAP STATUS: Clearly distinguish sample data, errors, and hidden layers. */}
           <div className="map-period-chip"><Satellite size={14} /><span>OBSERVATIONS <b>{month}</b> · {sensor || 'All sensors'}</span>{loading && <RefreshCcw size={13} className="loading-spinner" />}</div>
@@ -295,7 +298,18 @@ export default function App() {
                   {page === 'warnings' && <EarlyWarningPage onOpenLocations={() => { setPanelOpen(false); setTimelineOpen(false); setLocationToolOpen(true); }} onViewOnMap={(latitude, longitude) => { setPanelOpen(false); setTimelineOpen(false); setLocationToolOpen(false); locateCoordinate(latitude, longitude); }} />}
                   {page === 'help' && (
                     <section className="workspace-help">
-                      <h2>Explore the workspace</h2>
+                      <h2>About TANAW</h2>
+                      <p>TANAW helps people explore satellite observations of hot spots. It brings MODIS and VIIRS observations together on a map and calendar so researchers, students, and emergency responders can review where and when satellites detected unusual heat.</p>
+                      <h3>Frequently asked questions</h3>
+                      <details><summary>What is this website for?</summary><p>It is a research and learning tool for viewing and comparing satellite hot-spot observations. Its goal is to make the data easier to explore, explain, and discuss.</p></details>
+                      <details><summary>What do MODIS and VIIRS show?</summary><p>They are instruments on Earth-observing satellites. The map shows locations where their data identified a thermal anomaly. A marker is a satellite observation, not a confirmed fire boundary.</p></details>
+                      <details><summary>Why compare the two sensors?</summary><p>MODIS and VIIRS observe Earth with different instruments and viewing schedules. Comparing their detections can help users study similarities and differences, but a match by itself does not prove both sensors saw the same fire.</p></details>
+                      <details><summary>Can TANAW confirm a fire or predict where one will spread?</summary><p>No. A hot-spot detection may represent a fire or another heat source, and this prototype does not confirm incidents, map fire perimeters, or predict spread. Check authoritative local reports and field information.</p></details>
+                      <details><summary>Can emergency responders use it?</summary><p>Responders can use the map as an exploratory reference alongside official alerts and ground reports. It is not an operational alerting or dispatch system, and should not be the only source for safety decisions.</p></details>
+                      <details><summary>Does it include live weather or live satellite data?</summary><p>Not automatically. The current project uses its connected or supplied observation dataset. Weather feeds and live NASA data need to be connected separately before they appear.</p></details>
+                      <details><summary>What does the calendar count?</summary><p>It groups satellite observations by acquisition date in UTC. A count is the number of observations, not the number of separate fires.</p></details>
+                      <details><summary>Who can use the website?</summary><p>Researchers can explore and compare observations, students can learn how satellite monitoring works, and response teams can review the map as supplementary context. Always read the data notes and limitations.</p></details>
+                      <h3>Quick map guide</h3>
                       <p><b>Map:</b> drag to pan, scroll or use + / − to zoom. Click a colored observation for its details.</p>
                       <p><b>Layers:</b> toggle sensors, background imagery, the coordinate readout, or the latitude/longitude grid.</p>
                       <p><b>Calendar:</b> choose a date to open your existing pie-chart and table popup.</p>
@@ -316,7 +330,8 @@ export default function App() {
           {/* BOTTOM TOOLBAR: Every visible tool has a working action. */}
           <div className="workspace-toolbar" role="toolbar" aria-label="Map tools">
             <button type="button" aria-label="Toggle map timeline" aria-pressed={timelineOpen} onClick={toggleTimeline}><Clock3 size={21} /><span>Timeline</span></button>
-            <button type="button" aria-label="Toggle location tool" aria-pressed={locationToolOpen} onClick={() => { setTimelineOpen(false); setLocationToolOpen(!locationToolOpen); if (!locationToolOpen) setPanelOpen(false); }}><MapPin size={21} /><span>Location</span></button>
+            <button type="button" aria-label="Toggle location tool" aria-pressed={locationToolOpen} onClick={() => { setTimelineOpen(false); setAreaMeasureOpen(false); setLocationToolOpen(!locationToolOpen); if (!locationToolOpen) setPanelOpen(false); }}><MapPin size={21} /><span>Location</span></button>
+            <button type="button" aria-label="Toggle area measurement" aria-pressed={areaMeasureOpen} onClick={() => { setTimelineOpen(false); setLocationToolOpen(false); setAreaMeasureOpen(!areaMeasureOpen); if (!areaMeasureOpen) setPanelOpen(false); }}><Ruler size={21} /><span>Measure</span></button>
             <button type="button" onClick={() => changeLayer('grid', !layers.grid)} aria-pressed={layers.grid}><Grid2X2 size={21} /><span>Lat / Lon</span></button>
             <MapExportTools mapReference={mapReference} loading={timelineOpen ? timeline.loading : loading} settings={{ month, sensor, basemap, layers, timelineOpen, timelineDate, timelineDays }} />
             <button type="button" onClick={() => { setTimelineOpen(false); setPanelOpen(!panelOpen); }} aria-pressed={!panelOpen}><Maximize2 size={21} /><span>{panelOpen ? 'Full map' : 'Panel'}</span></button>
@@ -326,7 +341,7 @@ export default function App() {
           </>)}
         </main>
       </div>
-      {page !== 'dashboard' && selectedDate && <DatePopup date={selectedDate} onClose={closeDatePopup} />}
+      {page !== 'dashboard' && selectedDate && <DatePopup date={selectedDate} weather={null} onClose={closeDatePopup} />}
     </>
   );
 }
