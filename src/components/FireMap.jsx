@@ -4,6 +4,7 @@ import { MapContainer, TileLayer, CircleMarker, Popup, Circle } from 'react-leaf
 import { getThemeColors } from '../theme';
 import { validLocation } from '../lib/map-utils';
 import ResizeMap from './ResizeMap';
+import SatelliteTemperature from './SatelliteTemperature';
 import LocationTool from './LocationTool';
 import WindLayer from './WindLayer';
 import ProvinceBoundaries from './ProvinceBoundaries';
@@ -94,6 +95,7 @@ export default function FireMap({ records, layers, basemap, mapReference, select
                 Longitude: {Number(record.longitude).toFixed(4)}<br />
                 FRP: {record.frp ?? 'N/A'} MW<br />
                 Confidence: {record.confidence ?? 'N/A'}
+                <SatelliteTemperature observation={record} />
                 </>)}
               </Popup>
             </CircleMarker>

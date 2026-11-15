@@ -75,7 +75,7 @@ export async function loadSummary(start, end, sensor) {
   let query = supabase
     .from('fire_observations')
     .select(
-      'id,sensor,satellite,latitude,longitude,acq_date,acq_time,frp,confidence,daynight,source_file',
+      'id,sensor,satellite,latitude,longitude,acq_date,acq_time,frp,confidence,daynight,source_file,brightness,bright_t31',
       { count: 'exact' },
     )
     .order('acq_date', { ascending: false })
@@ -118,7 +118,7 @@ export async function loadTimelineObservations(start, end, sensor, signal) {
   while (true) {
     if (signal?.aborted) throw new DOMException('Cancelled', 'AbortError');
     let query = supabase.from('fire_observations').select(
-      'id,sensor,satellite,latitude,longitude,acq_date,acq_time,frp,confidence,daynight,source_file',
+      'id,sensor,satellite,latitude,longitude,acq_date,acq_time,frp,confidence,daynight,source_file,brightness,bright_t31',
       { count: 'exact' },
     ).gte('acq_date', start).lte('acq_date', end)
       .order('acq_date', { ascending: true }).order('id', { ascending: true })

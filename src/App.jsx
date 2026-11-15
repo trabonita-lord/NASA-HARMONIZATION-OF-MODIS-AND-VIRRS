@@ -290,7 +290,7 @@ export default function App() {
                   {page === 'overview' && <OverviewPage onOpenLayers={() => openPage('map')} />}
                   {page === 'map' && <><MapPage /><LayersPanel layers={layers} onChangeLayer={changeLayer} basemap={basemap} onChangeBasemap={changeBasemap} onLocate={locateCoordinate} modis={modis} viirs={viirs} /></>}
                   {page === 'calendar' && <CalendarPage month={month} counts={counts} onSelectDate={setSelectedDate} />}
-                  {page === 'compare' && <ComparisonPage modis={modis} viirs={viirs} />}
+                  {page === 'compare' && <ComparisonPage modis={modis} viirs={viirs} records={records} />}
                   {page === 'sources' && <SourcesPage />}
                   {page === 'warnings' && <EarlyWarningPage onOpenLocations={() => { setPanelOpen(false); setTimelineOpen(false); setLocationToolOpen(true); }} onViewOnMap={(latitude, longitude) => { setPanelOpen(false); setTimelineOpen(false); setLocationToolOpen(false); locateCoordinate(latitude, longitude); }} />}
                   {page === 'help' && (

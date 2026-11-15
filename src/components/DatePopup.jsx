@@ -54,7 +54,7 @@ export default function DatePopup({ date, onClose }) {
           const { data, error: queryError } = await supabase
             .from('fire_observations')
             .select(
-              'id, sensor, satellite, latitude, longitude, frp, confidence, acq_date'
+              'id, sensor, satellite, latitude, longitude, frp, confidence, acq_date, brightness, bright_t31'
             )
             .eq('acq_date', date)
             .order('id', { ascending: true })

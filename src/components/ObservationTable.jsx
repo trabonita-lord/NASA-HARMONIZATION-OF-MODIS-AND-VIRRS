@@ -1,5 +1,6 @@
 
 import React from 'react';
+import SatelliteTemperature from './SatelliteTemperature';
 
 export default function ObservationTable({ observations = [] }) {
   return (
@@ -18,13 +19,14 @@ export default function ObservationTable({ observations = [] }) {
             <th scope="col">Longitude</th>
             <th scope="col">FRP (MW)</th>
             <th scope="col">Confidence</th>
+            <th scope="col">Satellite brightness temperatures</th>
           </tr>
         </thead>
 
         <tbody>
           {observations.length === 0 ? (
             <tr>
-              <td colSpan={6} style={{ textAlign: 'center' }}>
+              <td colSpan={7} style={{ textAlign: 'center' }}>
                 No observations found for this date.
               </td>
             </tr>
@@ -54,6 +56,7 @@ export default function ObservationTable({ observations = [] }) {
                 </td>
 
                 <td>{observation.confidence ?? 'N/A'}</td>
+                <td><SatelliteTemperature observation={observation} /></td>
               </tr>
             ))
           )}

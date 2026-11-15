@@ -1573,3 +1573,7 @@ button.calendar-day:focus-visible {
   .popup-content button { transition: none; }
   .popup-content button:hover { transform: none; }
 }
+.satellite-temperature dl { margin: 0.75rem 0; }
+.satellite-temperature dt { font-weight: 600; }
+.satellite-temperature dd { margin: 0.15rem 0 0.6rem; }
+.satellite-temperature small { display: block; line-height: 1.4; }

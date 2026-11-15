@@ -2,8 +2,9 @@
 import React, { useEffect, useState } from 'react';
 import { GitCompareArrows, ShieldCheck } from 'lucide-react';
 import { loadHarmonizationSummary } from '../lib/harmonization';
+import { satelliteTemperatures, formatCelsius, BRIGHTNESS_TEMPERATURE_NOTE } from '../lib/satellite-temperature';
 
-export default function ComparisonPage({ modis, viirs }) {
+export default function ComparisonPage({ modis, viirs, records = [] }) {
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -76,6 +77,24 @@ export default function ComparisonPage({ modis, viirs }) {
           </div>
         </div>
       </div>
+
+      <h3>Satellite brightness temperature ranges</h3>
+      <p>Ranges cover valid readings in the fetched sample. Channels have different spectral responses; these are not matched-pair temperature differences.</p>
+      <div className="observation-table-container">
+        <table className="observation-table">
+          <thead><tr><th scope="col">Measurement</th><th scope="col">Range (Celsius)</th><th scope="col">Valid readings</th></tr></thead>
+          <tbody>{['MODIS', 'VIIRS'].flatMap(sensor => {
+            const sensorRecords = records.filter(record => record.sensor === sensor);
+            return satelliteTemperatures({ sensor }).map((channel, index) => {
+              const values = sensorRecords.map(record => satelliteTemperatures(record)[index].celsius).filter(value => value !== null);
+              const minimum = values.reduce((a, b) => Math.min(a, b), Infinity);
+              const maximum = values.reduce((a, b) => Math.max(a, b), -Infinity);
+              return <tr key={sensor + channel.field}><th scope="row">{channel.label}</th><td>{values.length ? `${formatCelsius(minimum)} to ${formatCelsius(maximum)}` : 'Not available'}</td><td>{values.length}</td></tr>;
+            });
+          })}</tbody>
+        </table>
+      </div>
+      <p>{BRIGHTNESS_TEMPERATURE_NOTE}</p>
 
       <div className="info-message">
         <ShieldCheck size={18} />
