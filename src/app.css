@@ -801,6 +801,8 @@ code {
   border-radius: inherit;
 }
 
+
+
 /* ==================================================
    13. DATA SOURCE BOXES AND FOOTER
    ================================================== */
@@ -1248,6 +1250,43 @@ button.calendar-day:focus-visible {
   border: 1px solid var(--surface-border);
   border-radius: 12px;
   background: var(--surface-background);
+}
+
+.daily-weather-card {
+  margin: 16px 0;
+  padding: 18px 20px;
+  border: 1px solid var(--surface-border);
+  border-radius: 12px;
+  background: var(--surface-background);
+}
+
+.daily-weather-heading,
+.daily-weather-details {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.daily-weather-heading { align-items: center; }
+.daily-weather-heading h3 { margin: 4px 0 0; color: var(--text-primary); font-size: 15px; }
+.daily-weather-status { color: var(--text-secondary); font-size: 10px; font-weight: 700; letter-spacing: .06em; }
+.daily-weather-status.is-connected { color: #4CAF84; }
+.daily-weather-details { margin-top: 16px; }
+.daily-weather-temperature,
+.daily-weather-forecast { display: flex; flex-direction: column; gap: 5px; }
+.daily-weather-temperature > span,
+.daily-weather-forecast > span { color: var(--text-secondary); font-size: 12px; }
+.daily-weather-temperature strong { color: var(--text-primary); font-size: 28px; line-height: 1.15; }
+.daily-weather-temperature small,
+.daily-weather-forecast p,
+.daily-weather-note { margin: 0; color: var(--text-secondary); font-size: 12px; line-height: 1.5; }
+.daily-weather-forecast { max-width: 58%; }
+.daily-weather-forecast p { color: var(--text-primary); }
+.daily-weather-note { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--surface-border); }
+
+@media (max-width: 480px) {
+  .daily-weather-details { flex-direction: column; }
+  .daily-weather-forecast { max-width: none; }
 }
 
 .pie-chart-panel h3 {

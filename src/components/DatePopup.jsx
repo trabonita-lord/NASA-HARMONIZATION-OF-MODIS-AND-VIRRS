@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase';
 import ObservationPieChart from './ObservationPieChart';
 import ObservationTable from './ObservationTable';
 
-export default function DatePopup({ date, onClose }) {
+export default function DatePopup({ date, onClose, weather = null }) {
   const popupRef = useRef(null);
 
   const [observations, setObservations] = useState([]);
@@ -130,6 +130,8 @@ export default function DatePopup({ date, onClose }) {
         </button>
       </div>
 
+      <DailyWeatherSummary date={date} weather={weather} />
+
       {loading ? (
         <p>Loading observations...</p>
       ) : error ? (
@@ -143,5 +145,44 @@ export default function DatePopup({ date, onClose }) {
         </>
       )}
     </dialog>
+  );
+}
+
+function DailyWeatherSummary({ date, weather }) {
+  const hasWeather = weather && typeof weather === 'object';
+  const temperature = Number.isFinite(weather?.temperature_c)
+    ? `${weather.temperature_c.toFixed(1)} °C`
+    : '—';
+  const condition = typeof weather?.condition === 'string' && weather.condition.trim()
+    ? weather.condition
+    : 'Not connected';
+  const forecast = typeof weather?.forecast === 'string' && weather.forecast.trim()
+    ? weather.forecast
+    : 'Daily forecast will appear here when the weather data source is connected.';
+
+  return (
+    <section className="daily-weather-card" aria-labelledby="daily-weather-title">
+      <div className="daily-weather-heading">
+        <div>
+          <div className="section-caption">WEATHER / {date} UTC</div>
+          <h3 id="daily-weather-title">Daily weather</h3>
+        </div>
+        <span className={hasWeather ? 'daily-weather-status is-connected' : 'daily-weather-status'}>
+          {hasWeather ? 'DATA CONNECTED' : 'AWAITING DATA'}
+        </span>
+      </div>
+      <div className="daily-weather-details">
+        <div className="daily-weather-temperature">
+          <span>Temperature</span>
+          <strong>{temperature}</strong>
+          <small>{condition}</small>
+        </div>
+        <div className="daily-weather-forecast">
+          <span>Forecast</span>
+          <p>{forecast}</p>
+        </div>
+      </div>
+      {!hasWeather && <p className="daily-weather-note">Connect this panel to your daily weather data using temperature_c, condition, and forecast fields.</p>}
+    </section>
   );
 }

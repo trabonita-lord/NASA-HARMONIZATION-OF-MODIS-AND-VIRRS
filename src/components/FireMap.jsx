@@ -1,6 +1,7 @@
 // One persistent map for the full workspace. All existing observations remain unchanged.
 import React, { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, CircleMarker, Popup, Circle } from 'react-leaflet';
+import { Check, Trash2, Undo2 } from 'lucide-react';
 import { getThemeColors } from '../theme';
 import { validLocation } from '../lib/map-utils';
 import ResizeMap from './ResizeMap';
@@ -11,10 +12,14 @@ import { MAP_BACKGROUNDS, PHILIPPINES_BOUNDS } from '../lib/map-backgrounds';
 import CoordinateGrid from './CoordinateGrid';
 import CoordinateReadout from './CoordinateReadout';
 import { FitObservationView } from './MapControls';
+import AreaMeasurementTool from './AreaMeasurementTool';
+import { formatAreaMeasurement, polygonAreaSquareMeters } from '../lib/area-measurement';
 
-export default function FireMap({ records, layers, basemap, mapReference, selectedLocation, onBasemapWarning, locationToolOpen, onCloseLocationTool, timelineActive = false, sharedView = null }) {
+export default function FireMap({ records, layers, basemap, mapReference, selectedLocation, onBasemapWarning, locationToolOpen, onCloseLocationTool, areaMeasureOpen = false, onCloseAreaMeasure, timelineActive = false, sharedView = null }) {
   const theme = getThemeColors();
   const [failedBasemap, setFailedBasemap] = useState('');
+  const [measurePoints, setMeasurePoints] = useState([]);
+  const measureArea = polygonAreaSquareMeters(measurePoints);
   useEffect(function resetFallback() { setFailedBasemap(''); }, [basemap]);
 
   // Only the map background and outlines come from the supplied reference.
@@ -62,6 +67,7 @@ export default function FireMap({ records, layers, basemap, mapReference, select
         <FitObservationView records={records} enabled={!timelineActive && !sharedView} />
         <WindLayer enabled={Boolean(layers.wind)} paused={timelineActive} hideStatus={locationToolOpen} />
         <LocationTool open={locationToolOpen} onClose={onCloseLocationTool} />
+        <AreaMeasurementTool active={areaMeasureOpen} points={measurePoints} setPoints={setMeasurePoints} />
         {layers.grid && <CoordinateGrid />}
         {layers.coordinates && <CoordinateReadout />}
         {selectedLocation && (
@@ -100,6 +106,18 @@ export default function FireMap({ records, layers, basemap, mapReference, select
           );
         })}
       </MapContainer>
+      {(areaMeasureOpen || measurePoints.length > 0) && (
+        <section className="area-measure-panel" aria-label="Area measurement controls">
+          <strong>{areaMeasureOpen ? 'Draw measurement area' : 'Measurement complete'}</strong>
+          <p>{measurePoints.length < 3 ? 'Click the map to add points. Area appears after 3 points.' : `Area: ${formatAreaMeasurement(measureArea)}`}</p>
+          {measurePoints.length >= 3 && <small>Spherical area calculated from your polygon vertices.</small>}
+          <div className="area-measure-actions">
+            <button type="button" onClick={() => setMeasurePoints(previous => previous.slice(0, -1))} disabled={measurePoints.length === 0}><Undo2 size={15} /> Remove last point</button>
+            <button type="button" onClick={() => setMeasurePoints([])} disabled={measurePoints.length === 0}><Trash2 size={15} /> Clear</button>
+            {areaMeasureOpen && <button type="button" onClick={onCloseAreaMeasure} disabled={measurePoints.length < 3}><Check size={15} /> Finish</button>}
+          </div>
+        </section>
+      )}
     </div>
   );
 }
