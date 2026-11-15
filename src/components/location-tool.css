@@ -1,4 +1,4 @@
-﻿/* LOCATION TOOL: compact glass panel. Adjust width/opacity here. */
+/* LOCATION TOOL: compact glass panel. Adjust width/opacity here. */
 .location-tool-panel {
   position: absolute;
   top: 64px;
@@ -43,6 +43,19 @@
 .location-find-form > div { display: flex; gap: 6px; }
 .location-find-form input { width: 100%; min-width: 0; padding: 8px; border: 1px solid rgba(171, 204, 229, .3); border-radius: 5px; background: rgba(12, 32, 53, .4); color: #EFF5F8; font-size: 10px; }
 .location-find-form button { padding: 6px 9px; border: 1px solid rgba(241, 156, 95, .5); border-radius: 5px; background: rgba(119, 65, 29, .45); color: #FFD0A7; font-size: 10px; font-weight: 600; }
+/* SEARCH ROW: reserve room for Find so its word never wraps into letters. */
+.location-find-form > .location-search-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px; }
+.location-find-form .location-find-button { display: inline-flex; align-items: center; justify-content: center; gap: 5px; min-width: 66px; min-height: 36px; white-space: nowrap; overflow-wrap: normal; word-break: normal; }
+.location-find-button svg { flex-shrink: 0; }
+.location-find-button[aria-busy="true"] { opacity: .7; }
+/* SUGGESTION DROPDOWN: scroll inside the panel, without covering its footer. */
+.location-suggestions { display: grid; gap: 0; max-height: 190px; overflow-y: auto; overscroll-behavior: contain; margin: 5px 0 0; padding: 4px; list-style: none; border: 1px solid rgba(171, 204, 229, .35); border-radius: 6px; background: rgba(10, 29, 43, .94); scrollbar-width: thin; }
+.location-suggestions li { padding: 9px 8px; border-radius: 4px; cursor: pointer; overflow-wrap: anywhere; }
+.location-suggestions li + li { border-top: 1px solid rgba(171, 204, 229, .12); }
+.location-suggestions li:hover, .location-suggestions li[aria-selected="true"] { background: #294356; box-shadow: inset 2px 0 var(--accent-orange, #FF5722); }
+.location-suggestions b { display: block; color: #EEF5F8; font-size: 11px; line-height: 1.4; }
+.location-suggestions small { display: block; margin-top: 3px; color: #AFC8D9; font-size: 10px; line-height: 1.5; }
+.location-tool-body .location-search-status { margin: 8px 0 0; font-size: 10px; color: #BED3E2; line-height: 1.5; }
 .location-place-list { display: grid; gap: 6px; padding: 0; margin: 9px 0 0; list-style: none; }
 .location-place-list li { display: flex; align-items: center; border: 1px solid rgba(171, 204, 229, .24); border-radius: 6px; overflow: hidden; }
 .location-place-list button { flex: 1; min-width: 0; padding: 8px; background: rgba(17, 47, 64, .35); border: 0; color: #EDF4F7; text-align: left; white-space: normal; }
@@ -50,23 +63,17 @@
 .location-place-list small { display: block; margin-top: 4px; color: #AEC8D8; font-size: 9px; line-height: 1.5; }
 .location-place-list .location-remove-saved { flex: none; color: #FFC69E; }
 
-/* MAP MARKER: cyan target ring with a thermal-orange center; no teardrop pin. */
+/* LOCATION FLAG: edit the cloth and pole colors here. */
 .location-pin-icon { background: transparent; border: 0; }
-.location-map-marker {
-  position: absolute;
-  inset: 4px;
-  display: grid;
-  place-items: center;
-  border: 1px solid var(--sensor-viirs, #00E5FF);
-  border-radius: 50%;
-  background: rgba(9, 25, 41, .78);
-  box-shadow: 0 0 0 4px rgba(9, 25, 41, .3), 0 0 12px rgba(0, 229, 255, .2);
+.location-flag-marker {
+  display: block;
+  width: 32px;
+  height: 36px;
+  overflow: visible;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .7));
 }
-.location-map-marker::before, .location-map-marker::after { content: ''; position: absolute; background: var(--sensor-viirs, #00E5FF); opacity: .75; }
-.location-map-marker::before { left: -5px; right: -5px; top: 50%; height: 1px; }
-.location-map-marker::after { top: -5px; bottom: -5px; left: 50%; width: 1px; }
-.location-marker-core { z-index: 1; width: 10px; height: 10px; border: 2px solid #FFD0A7; border-radius: 50%; background: var(--accent-orange, #FF5722); box-shadow: 0 0 7px rgba(255, 87, 34, .55); }
-
+.location-flag-cloth { fill: var(--accent-orange, #FF5722); stroke: #FFD0A7; stroke-width: 1.5; stroke-linejoin: round; }
+.location-flag-pole { fill: none; stroke: var(--sensor-viirs, #00E5FF); stroke-width: 2.5; stroke-linecap: round; }
 /* ADDRESS CARD: same transparent glass treatment as the timeline. */
 .workspace-map .location-tool-popup .leaflet-popup-content-wrapper,
 .workspace-map .location-tool-popup .leaflet-popup-tip { background: rgba(9, 25, 41, .48); color: #E7F1F6; border: 1px solid rgba(205, 231, 250, .27); }

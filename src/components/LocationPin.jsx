@@ -1,21 +1,22 @@
-﻿// Theme-colored target marker and compact glass address card. Observation markers stay unchanged.
+// Theme-colored location flag and compact glass address card. Observation markers stay unchanged.
 import React, { useEffect, useRef } from 'react';
 import { Marker, Popup } from 'react-leaflet';
 import { divIcon } from 'leaflet';
 
 const locationIcon = divIcon({
   className: 'location-pin-icon',
-  html: '<span class="location-map-marker"><span class="location-marker-core"></span></span>',
-  iconSize: [32, 32],
-  iconAnchor: [16, 16],
-  popupAnchor: [0, -18],
+  // The pole's base marks the exact coordinates; the flag sits above them.
+  html: '<svg class="location-flag-marker" viewBox="0 0 32 36" aria-hidden="true"><path class="location-flag-cloth" d="M8 5 C15 0 20 10 28 5 L28 20 C20 25 15 15 8 20 Z"/><path class="location-flag-pole" d="M8 3 V33 M4 33 H12"/></svg>',
+  iconSize: [32, 36],
+  iconAnchor: [8, 33],
+  popupAnchor: [8, -30],
 });
 
-export default function LocationPin({ place, active, saved, onSave }) {
+export default function LocationPin({ place, active, selectionVersion, saved, onSave }) {
   const markerRef = useRef(null);
   useEffect(function openSelectedCard() {
     if (active && markerRef.current) markerRef.current.openPopup();
-  }, [active]);
+  }, [active, selectionVersion]);
 
   return (
     <Marker ref={markerRef} position={[place.latitude, place.longitude]} icon={locationIcon} title={place.title} bubblingMouseEvents={false} zIndexOffset={1000}>

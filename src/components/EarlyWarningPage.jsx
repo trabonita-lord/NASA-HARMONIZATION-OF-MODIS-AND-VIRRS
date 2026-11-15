@@ -94,7 +94,6 @@ export default function EarlyWarningPage({ onOpenLocations, onViewOnMap }) {
         <p className="warning-note">Acquisition-window groups are candidates for review; they do not confirm the same physical fire or continued burning.</p>
       </section>
       {missingTimes > 0 && <p className="warning-information">{missingTimes} loaded observations have missing or invalid acquisition times and are excluded from recent/repeated-detection review.</p>}
-      <p className="warning-note">Satellite hotspots are thermal anomalies, not confirmed wildfires. Empty, delayed, or missing data must not be interpreted as an all-clear.</p>
     </div>
   );
 }
