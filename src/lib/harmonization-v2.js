@@ -14,6 +14,10 @@ function validObservation(record, sensor) {
     record &&
     record.sensor === sensor &&
     record.id != null &&
+    record.latitude != null &&
+    record.longitude != null &&
+    record.latitude !== '' &&
+    record.longitude !== '' &&
     Number.isFinite(Number(record.latitude)) &&
     Number.isFinite(Number(record.longitude)) &&
     Number(record.latitude) >= -90 &&
@@ -31,7 +35,9 @@ function validateOptions(options) {
     !Number.isFinite(options.maxTimeMinutes) ||
     options.maxTimeMinutes <= 0
   ) {
-    throw new Error('Matching thresholds must be positive finite numbers.');
+    throw new Error(
+      'Matching thresholds must be positive finite numbers.'
+    );
   }
 }
 
@@ -42,6 +48,29 @@ function compareIds(a, b) {
 }
 
 /**
+ * Binary search for the first observation whose
+ * timestamp is greater than or equal to targetTime.
+ *
+ * The observations must already be sorted by timestamp.
+ */
+function lowerBoundByTime(sortedObservations, targetTime) {
+  let left = 0;
+  let right = sortedObservations.length;
+
+  while (left < right) {
+    const middle = Math.floor((left + right) / 2);
+
+    if (sortedObservations[middle].timestamp < targetTime) {
+      left = middle + 1;
+    } else {
+      right = middle;
+    }
+  }
+
+  return left;
+}
+
+/**
  * Identify candidate MODIS-VIIRS observation associations.
  *
  * Scores describe proximity only, NOT the probability that
@@ -49,6 +78,14 @@ function compareIds(a, b) {
  *
  * All valid candidates are retained, including ambiguous matches.
  * No database records are modified.
+ *
+ * Optimization:
+ * VIIRS observations are sorted by acquisition timestamp.
+ * Binary search identifies the beginning of the permitted
+ * time window for each MODIS observation.
+ *
+ * This avoids unnecessary comparisons with VIIRS observations
+ * outside the configured time window.
  */
 export function matchFireObservations(
   observations,
@@ -65,29 +102,58 @@ export function matchFireObservations(
 
   validateOptions(settings);
 
+  // Filter valid MODIS observations.
   const modis = observations.filter(record =>
     validObservation(record, 'MODIS')
   );
 
+  // Filter valid VIIRS observations.
   const viirs = observations.filter(record =>
     validObservation(record, 'VIIRS')
   );
 
+  // Build a timestamp index for VIIRS observations.
+  const indexedViirs = viirs
+    .map(record => ({
+      record,
+      timestamp: observationTime(record),
+    }))
+    .sort((a, b) => a.timestamp - b.timestamp);
+
   const candidates = [];
 
+  // Convert the configured time threshold to milliseconds.
+  const timeWindowMs = settings.maxTimeMinutes * 60_000;
+
+  // Process each valid MODIS observation.
   for (const m of modis) {
     const modisTime = observationTime(m);
 
-    for (const v of viirs) {
-      const viirsTime = observationTime(v);
+    const earliestTime = modisTime - timeWindowMs;
+    const latestTime = modisTime + timeWindowMs;
 
-      const timeDifferenceMinutes =
-        Math.abs(modisTime - viirsTime) / 60000;
+    // Find the first VIIRS observation within the time window.
+    const startIndex = lowerBoundByTime(
+      indexedViirs,
+      earliestTime
+    );
 
-      if (timeDifferenceMinutes > settings.maxTimeMinutes) {
-        continue;
+    // Examine only VIIRS observations within the time window.
+    for (let i = startIndex; i < indexedViirs.length; i++) {
+      const {
+        record: v,
+        timestamp: viirsTime,
+      } = indexedViirs[i];
+
+      // Stop once observations exceed the permitted time window.
+      if (viirsTime > latestTime) {
+        break;
       }
 
+      const timeDifferenceMinutes =
+        Math.abs(modisTime - viirsTime) / 60_000;
+
+      // Calculate Haversine distance.
       const spatialDistanceKm = distanceKm(
         Number(m.latitude),
         Number(m.longitude),
@@ -95,6 +161,7 @@ export function matchFireObservations(
         Number(v.longitude)
       );
 
+      // Reject observations outside the distance threshold.
       if (spatialDistanceKm > settings.maxDistanceKm) {
         continue;
       }
@@ -106,8 +173,10 @@ export function matchFireObservations(
       const timeComponent =
         timeDifferenceMinutes / settings.maxTimeMinutes;
 
-      const proximityScore =
-        Math.hypot(distanceComponent, timeComponent);
+      const proximityScore = Math.hypot(
+        distanceComponent,
+        timeComponent
+      );
 
       candidates.push({
         modisObservationId: m.id,
@@ -120,6 +189,7 @@ export function matchFireObservations(
     }
   }
 
+  // Count candidate associations per observation.
   const modisCandidateCounts = new Map();
   const viirsCandidateCounts = new Map();
 
@@ -138,6 +208,7 @@ export function matchFireObservations(
     );
   }
 
+  // Rank candidate pairs by combined spatial and temporal proximity.
   candidates.sort(
     (a, b) =>
       a.proximityScore - b.proximityScore ||
@@ -147,6 +218,7 @@ export function matchFireObservations(
       compareIds(a.viirsObservationId, b.viirsObservationId)
   );
 
+  // Assign a rank within each MODIS observation's candidates.
   const modisRanks = new Map();
 
   return candidates.map(candidate => {
@@ -158,13 +230,17 @@ export function matchFireObservations(
     return {
       ...candidate,
       matchRank: rank,
-      modisCandidateCount: modisCandidateCounts.get(modisId),
-      viirsCandidateCount: viirsCandidateCounts.get(
-        candidate.viirsObservationId
-      ),
+      modisCandidateCount:
+        modisCandidateCounts.get(modisId),
+      viirsCandidateCount:
+        viirsCandidateCounts.get(
+          candidate.viirsObservationId
+        ),
       ambiguous:
         modisCandidateCounts.get(modisId) > 1 ||
-        viirsCandidateCounts.get(candidate.viirsObservationId) > 1,
+        viirsCandidateCounts.get(
+          candidate.viirsObservationId
+        ) > 1,
     };
   });
 }
@@ -182,7 +258,9 @@ export function summarizeV2Matches(matches) {
     matches.map(match => match.viirsObservationId)
   );
 
-  const ambiguous = matches.filter(match => match.ambiguous);
+  const ambiguous = matches.filter(
+    match => match.ambiguous
+  );
 
   return {
     algorithmVersion: HARMONIZATION_V2,
