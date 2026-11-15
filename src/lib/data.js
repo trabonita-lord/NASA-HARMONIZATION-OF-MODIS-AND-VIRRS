@@ -110,8 +110,8 @@ export async function loadCalendar(start, end, sensor) {
   );
 }
 
-// TIMELINE MAP ONLY: Page through every selected observation, rather than the summary's 1,500-row preview.
-export async function loadTimelineObservations(start, end, sensor, signal) {
+// Shared paginated observations for the timeline and monitoring; optional bounds narrow the query.
+export async function loadTimelineObservations(start, end, sensor, signal, bounds = null) {
   if (!configured) return { records: filterSample(start, end, sensor), demo: true };
   const records = [];
   let offset = 0;
@@ -124,6 +124,8 @@ export async function loadTimelineObservations(start, end, sensor, signal) {
       .order('acq_date', { ascending: true }).order('id', { ascending: true })
       .range(offset, offset + 999);
     if (sensor) query = query.eq('sensor', sensor);
+    if (bounds) query = query.gte('latitude', bounds.south).lte('latitude', bounds.north)
+      .gte('longitude', bounds.west).lte('longitude', bounds.east);
     if (signal) query = query.abortSignal(signal);
     const response = await query;
     if (response.error) throw response.error;
