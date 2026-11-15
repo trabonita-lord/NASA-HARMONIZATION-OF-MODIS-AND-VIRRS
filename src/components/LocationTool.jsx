@@ -11,7 +11,7 @@ import {
 } from '../lib/location-tools';
 import './location-tool.css';
 
-export default function LocationTool({ open, onClose }) {
+export default function LocationTool({ open, onClose, onLocationChange }) {
   const [tab, setTab] = useState('current');
   const [multiple, setMultiple] = useState(false);
   const [selected, setSelected] = useState([]);
@@ -92,6 +92,7 @@ export default function LocationTool({ open, onClose }) {
     setNotice('');
     setSelected(previous => multiple ? [...previous.filter(item => item.key !== place.key), place] : [place]);
     setActiveKey(place.key);
+    onLocationChange?.(place);
     // Reopen the card even when this same place is chosen again.
     setSelectionVersion(value => value + 1);
     map.setView([place.latitude, place.longitude], Math.max(9, map.getZoom()));

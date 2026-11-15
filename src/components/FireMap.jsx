@@ -16,7 +16,7 @@ import { FitObservationView } from './MapControls';
 import AreaMeasurementTool from './AreaMeasurementTool';
 import { formatAreaMeasurement, polygonAreaSquareMeters } from '../lib/area-measurement';
 
-export default function FireMap({ records, layers, basemap, mapReference, selectedLocation, onBasemapWarning, locationToolOpen, onCloseLocationTool, areaMeasureOpen = false, onCloseAreaMeasure, timelineActive = false, sharedView = null }) {
+export default function FireMap({ onWeatherLocationChange, records, layers, basemap, mapReference, selectedLocation, onBasemapWarning, locationToolOpen, onCloseLocationTool, areaMeasureOpen = false, onCloseAreaMeasure, timelineActive = false, sharedView = null }) {
   const theme = getThemeColors();
   const [failedBasemap, setFailedBasemap] = useState('');
   const [measurePoints, setMeasurePoints] = useState([]);
@@ -67,7 +67,7 @@ export default function FireMap({ records, layers, basemap, mapReference, select
         <ResizeMap />
         <FitObservationView records={records} enabled={!timelineActive && !sharedView} />
         <WindLayer enabled={Boolean(layers.wind)} paused={timelineActive} hideStatus={locationToolOpen} />
-        <LocationTool open={locationToolOpen} onClose={onCloseLocationTool} />
+        <LocationTool onLocationChange={onWeatherLocationChange} open={locationToolOpen} onClose={onCloseLocationTool} />
         <AreaMeasurementTool active={areaMeasureOpen} points={measurePoints} setPoints={setMeasurePoints} />
         {layers.grid && <CoordinateGrid />}
         {layers.coordinates && <CoordinateReadout />}

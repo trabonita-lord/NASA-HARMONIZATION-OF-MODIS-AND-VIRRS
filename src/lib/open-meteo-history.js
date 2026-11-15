@@ -1,3 +1,5 @@
+import { summarizeHourlyWind } from './historical-wind';
+
 
 /**
  * TANAW — Open-Meteo Historical Weather Client
@@ -217,4 +219,38 @@ export async function fetchHistoricalWeather({
  */
 export function clearHistoricalWeatherCache() {
   cache.clear();
+}
+
+const DAILY_FIELDS = ['temperature_2m_mean', 'temperature_2m_max', 'temperature_2m_min',
+  'precipitation_sum', 'relative_humidity_2m_mean', 'wind_speed_10m_max'];
+
+// UTC days match the Fire Calendar acquisition dates, rather than local days.
+export async function fetchDailyHistoricalWeather({ latitude, longitude, date, signal } = {}) {
+  if (!validCoordinates(latitude, longitude)) throw new RangeError('Invalid weather coordinates.');
+  if (!validDate(date)) throw new RangeError('Invalid historical weather date.');
+  if (date < '1940-01-01' || date >= new Date().toISOString().slice(0, 10)) {
+    throw new RangeError('Historical weather is unavailable for this date. Choose a completed UTC day from 1940 onward.');
+  }
+  if (signal?.aborted) throw new DOMException('Cancelled', 'AbortError');
+  const url = new URL(API_URL);
+  url.search = new URLSearchParams({ latitude, longitude, start_date: date, end_date: date,
+    daily: DAILY_FIELDS.join(','), hourly: 'wind_speed_10m,wind_direction_10m,wind_gusts_10m', timezone: 'UTC', temperature_unit: 'celsius',
+    precipitation_unit: 'mm', wind_speed_unit: 'kmh' }).toString();
+  const key = url.toString();
+  if (cache.has(key)) return { ...cache.get(key) };
+  const response = await fetch(url, { signal });
+  if (!response.ok) throw new Error(`Open-Meteo archive request failed (HTTP ${response.status}). The date may not yet be available; try again later.`);
+  const payload = await response.json();
+  if (payload?.error) throw new Error('Open-Meteo could not provide historical weather for this request.');
+  if (!validCoordinates(payload?.latitude, payload?.longitude) || !Array.isArray(payload?.daily?.time)) {
+    throw new Error('Invalid Open-Meteo daily weather response.');
+  }
+  const index = payload.daily.time.indexOf(date);
+  const result = { date, provider: PROVIDER };
+  for (const field of DAILY_FIELDS) result[field] = index < 0 ? null : optionalNumber(payload.daily[field]?.[index]);
+  Object.assign(result, summarizeHourlyWind(payload.hourly, date));
+  // Missing/partial results can become available later: do not cache them.
+  if (DAILY_FIELDS.every(field => result[field] !== null) && result.wind_speed_hours === 24 &&
+      result.wind_direction_hours + result.wind_calm_hours === 24 && result.wind_gust_hours === 24) cache.set(key, result);
+  return { ...result };
 }

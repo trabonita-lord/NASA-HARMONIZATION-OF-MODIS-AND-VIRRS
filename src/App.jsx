@@ -50,6 +50,7 @@ export default function App() {
   const [navigationOpen, setNavigationOpen] = useState(true);
   const [basemap, setBasemap] = useState(sharedView?.basemap || 'satellite');
   const [layers, setLayers] = useState(sharedView?.layers || { modis: true, viirs: true, grid: false, coordinates: true, wind: false });
+  const [weatherLocation, setWeatherLocation] = useState(null);
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [mapWarning, setMapWarning] = useState('');
   const [locationToolOpen, setLocationToolOpen] = useState(false);
@@ -169,6 +170,7 @@ export default function App() {
   }
   function locateCoordinate(latitude, longitude) {
     setSelectedLocation([latitude, longitude]);
+    setWeatherLocation({ latitude, longitude, title: "Selected map area" });
     if (mapReference.current) mapReference.current.setView([latitude, longitude], 9);
   }
   function fitObservations() {
@@ -256,7 +258,7 @@ export default function App() {
 
           {page === 'dashboard' ? <DashboardPage onNavigate={openPage} /> : (<>
           {/* FULL-SCREEN MAP: Shared by the map panels; removed on Dashboard. */}
-          <FireMap records={mapRecords} sharedView={sharedView} timelineActive={timelineOpen} layers={layers} basemap={basemap} mapReference={mapReference} selectedLocation={selectedLocation} onBasemapWarning={setMapWarning} locationToolOpen={locationToolOpen} onCloseLocationTool={() => setLocationToolOpen(false)} areaMeasureOpen={areaMeasureOpen} onCloseAreaMeasure={() => setAreaMeasureOpen(false)} />
+          <FireMap onWeatherLocationChange={setWeatherLocation} records={mapRecords} sharedView={sharedView} timelineActive={timelineOpen} layers={layers} basemap={basemap} mapReference={mapReference} selectedLocation={selectedLocation} onBasemapWarning={setMapWarning} locationToolOpen={locationToolOpen} onCloseLocationTool={() => setLocationToolOpen(false)} areaMeasureOpen={areaMeasureOpen} onCloseAreaMeasure={() => setAreaMeasureOpen(false)} />
 
           {/* MAP STATUS: Clearly distinguish sample data, errors, and hidden layers. */}
           <div className="map-period-chip"><Satellite size={14} /><span>OBSERVATIONS <b>{month}</b> · {sensor || 'All sensors'}</span>{loading && <RefreshCcw size={13} className="loading-spinner" />}</div>
@@ -341,7 +343,7 @@ export default function App() {
           </>)}
         </main>
       </div>
-      {page !== 'dashboard' && selectedDate && <DatePopup date={selectedDate} weather={null} onClose={closeDatePopup} />}
+      {page !== 'dashboard' && selectedDate && <DatePopup date={selectedDate} weatherLocation={weatherLocation || (selectedLocation ? { latitude: selectedLocation[0], longitude: selectedLocation[1], title: "Selected map area" } : null)} onClose={closeDatePopup} />}
     </>
   );
 }
