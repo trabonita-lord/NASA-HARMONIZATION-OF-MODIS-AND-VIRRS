@@ -22,17 +22,21 @@ import DatePopup from './components/DatePopup';
 import SplashScreen from './components/SplashScreen';
 import CountUpNumber from './components/CountUpNumber';
 import MapTimeline from './components/MapTimeline';
+import MapExportTools from './components/MapExportTools';
+import { readMapView } from './lib/map-share';
 import useMapTimeline from './hooks/useMapTimeline';
 import { HISTORY_END, clampTimelineDate, validTimelineDate } from './lib/timeline-utils';
 import './workspace.css';
 
 export default function App() {
+  // A shared link restores presentation settings only; observation data is loaded normally.
+  const [sharedView, setSharedView] = useState(() => readMapView(window.location.href));
   // 1. EXISTING SELECTIONS AND DATA
   const [showSplash, setShowSplash] = useState(true);
-  const [showPopup, setShowPopup] = useState(true);
-  const [page, setPage] = useState('overview');
-  const [month, setMonth] = useState('2026-11');
-  const [sensor, setSensor] = useState('');
+  const [showPopup, setShowPopup] = useState(!sharedView);
+  const [page, setPage] = useState(sharedView ? 'map' : 'overview');
+  const [month, setMonth] = useState(sharedView?.month || '2026-11');
+  const [sensor, setSensor] = useState(sharedView?.sensor || '');
   const [records, setRecords] = useState([]);
   const [counts, setCounts] = useState({});
   const [total, setTotal] = useState(0);
@@ -42,21 +46,48 @@ export default function App() {
   const [reloadKey, setReloadKey] = useState(0);
 
   // 2. NEW PRESENTATION CONTROLS: These never change the stored data.
-  const [panelOpen, setPanelOpen] = useState(true);
+  const [panelOpen, setPanelOpen] = useState(!sharedView);
   const [navigationOpen, setNavigationOpen] = useState(true);
-  const [basemap, setBasemap] = useState('satellite');
-  const [layers, setLayers] = useState({ modis: true, viirs: true, grid: false, coordinates: true, wind: false });
+  const [basemap, setBasemap] = useState(sharedView?.basemap || 'satellite');
+  const [layers, setLayers] = useState(sharedView?.layers || { modis: true, viirs: true, grid: false, coordinates: true, wind: false });
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [mapWarning, setMapWarning] = useState('');
   const [locationToolOpen, setLocationToolOpen] = useState(false);
   // Timeline selections affect the map; existing monthly dashboard data is kept separate.
-  const [timelineOpen, setTimelineOpen] = useState(false);
-  const [timelineDate, setTimelineDate] = useState(HISTORY_END);
-  const [timelineDays, setTimelineDays] = useState(1);
+  const [timelineOpen, setTimelineOpen] = useState(sharedView?.timelineOpen || false);
+  const [timelineDate, setTimelineDate] = useState(sharedView?.timelineDate || HISTORY_END);
+  const [timelineDays, setTimelineDays] = useState(sharedView?.timelineDays || 1);
   const [timelineReloadKey, setTimelineReloadKey] = useState(0);
   const timeline = useMapTimeline({ enabled: timelineOpen, date: timelineDate, windowDays: timelineDays, sensor, reloadKey: timelineReloadKey });
   const mapRecords = timelineOpen ? timeline.records : records;
   const mapReference = useRef(null);
+
+  useEffect(function restoreChangedShareLink() {
+    function restoreView() {
+      const view = readMapView(window.location.href);
+      if (!view) return;
+      setSharedView(view);
+      setPage('map');
+      setMonth(view.month);
+      setSensor(view.sensor);
+      setBasemap(view.basemap);
+      setLayers(view.layers);
+      setTimelineOpen(view.timelineOpen);
+      setTimelineDate(view.timelineDate);
+      setTimelineDays(view.timelineDays);
+      setPanelOpen(false);
+      setLocationToolOpen(false);
+      setSelectedDate(null);
+      setShowPopup(false);
+      mapReference.current?.setView(view.center, view.zoom, { animate: false });
+    }
+    window.addEventListener('hashchange', restoreView);
+    window.addEventListener('popstate', restoreView);
+    return () => {
+      window.removeEventListener('hashchange', restoreView);
+      window.removeEventListener('popstate', restoreView);
+    };
+  }, []);
 
   const period = monthRange(month);
   const startDate = period.start;
@@ -179,11 +210,10 @@ export default function App() {
       {showSplash && <SplashScreen onFinish={setShowSplash} ready={!loading} />}
       {welcomePopupVisible && (
         <div className="popup" role="dialog" aria-modal="true" aria-labelledby="welcome-popup-title" onKeyDown={handleWelcomeKey}>
-          <div className="popup-content">
-            <div className="section-caption">YOUR OBSERVATION WORKSPACE</div>
+          <div className="popup-content"> 
             <h1 id="welcome-popup-title">Welcome to TANAW</h1>
-            <p>Explore MODIS and VIIRS observations on the full-screen map. Open your existing pages from the sidebar, or use Layers to show coordinates and control sensor visibility.</p>
-            <button type="button" onClick={closeWelcomePopup} autoFocus>Explore the map <ChevronRight size={16} /></button>
+              <p>A harmonized web-based platform for VIIRS and MODIS i monitoring thermal activity and network analytics.</p>
+            <button type="button" onClick={closeWelcomePopup} autoFocus>Explore<ChevronRight size={16} /></button>
           </div>
         </div>
       )}
@@ -198,12 +228,12 @@ export default function App() {
           <div className="workspace-header-divider" />
           <span className="workspace-header-caption">THERMAL AND NETWORK ANALYTICS WATCH</span>
           <div className="workspace-header-actions">
-            <span className="workspace-data-status"><i />{configured ? 'DATABASE CONNECTED' : 'SAMPLE MODE'}</span>
+           
             <button type="button" className="header-icon-button" aria-label="Open workspace guide" onClick={() => openPage('help')}><CircleHelp size={21} /></button>
           </div>
         </header>
 
-        <main className={page === 'dashboard' ? (navigationOpen ? 'dashboard-workspace' : 'dashboard-workspace dashboard-navigation-hidden') : timelineOpen ? 'map-workspace timeline-visible' : 'map-workspace'} aria-label={page === 'dashboard' ? 'Analytics dashboard' : 'Thermal activity map workspace'}>
+        <main className={page === 'dashboard' ? (navigationOpen ? 'dashboard-workspace' : 'dashboard-workspace dashboard-navigation-hidden') : timelineOpen ? 'map-workspace timeline-visible' : 'map-workspace'} data-navigation-open={navigationOpen} aria-label={page === 'dashboard' ? 'Analytics dashboard' : 'Thermal activity map workspace'}>
           {/* SIDEBAR: Existing pages remain available as direct buttons. */}
           {navigationOpen && (
             <nav className="workspace-rail" aria-label="Workspace pages">
@@ -223,7 +253,7 @@ export default function App() {
 
           {page === 'dashboard' ? <DashboardPage onNavigate={openPage} /> : (<>
           {/* FULL-SCREEN MAP: Shared by the map panels; removed on Dashboard. */}
-          <FireMap records={mapRecords} timelineActive={timelineOpen} layers={layers} basemap={basemap} mapReference={mapReference} selectedLocation={selectedLocation} onBasemapWarning={setMapWarning} locationToolOpen={locationToolOpen} onCloseLocationTool={() => setLocationToolOpen(false)} />
+          <FireMap records={mapRecords} sharedView={sharedView} timelineActive={timelineOpen} layers={layers} basemap={basemap} mapReference={mapReference} selectedLocation={selectedLocation} onBasemapWarning={setMapWarning} locationToolOpen={locationToolOpen} onCloseLocationTool={() => setLocationToolOpen(false)} />
 
           {/* MAP STATUS: Clearly distinguish sample data, errors, and hidden layers. */}
           <div className="map-period-chip"><Satellite size={14} /><span>OBSERVATIONS <b>{month}</b> · {sensor || 'All sensors'}</span>{loading && <RefreshCcw size={13} className="loading-spinner" />}</div>
@@ -255,7 +285,7 @@ export default function App() {
                 </div>
 
                 </>)}
-
+``
                 <div className="workspace-page-content">
                   {page === 'overview' && <OverviewPage onOpenLayers={() => openPage('map')} />}
                   {page === 'map' && <><MapPage /><LayersPanel layers={layers} onChangeLayer={changeLayer} basemap={basemap} onChangeBasemap={changeBasemap} onLocate={locateCoordinate} modis={modis} viirs={viirs} /></>}
@@ -274,7 +304,6 @@ export default function App() {
                     </section>
                   )}
                 </div>
-                <div className="workspace-panel-footer">NASA FIRMS source data · TANAW prototype<br />Not an operational emergency warning service.</div>
               </div>
             </aside>
           ) : (
@@ -289,6 +318,7 @@ export default function App() {
             <button type="button" aria-label="Toggle map timeline" aria-pressed={timelineOpen} onClick={toggleTimeline}><Clock3 size={21} /><span>Timeline</span></button>
             <button type="button" aria-label="Toggle location tool" aria-pressed={locationToolOpen} onClick={() => { setTimelineOpen(false); setLocationToolOpen(!locationToolOpen); if (!locationToolOpen) setPanelOpen(false); }}><MapPin size={21} /><span>Location</span></button>
             <button type="button" onClick={() => changeLayer('grid', !layers.grid)} aria-pressed={layers.grid}><Grid2X2 size={21} /><span>Lat / Lon</span></button>
+            <MapExportTools mapReference={mapReference} loading={timelineOpen ? timeline.loading : loading} settings={{ month, sensor, basemap, layers, timelineOpen, timelineDate, timelineDays }} />
             <button type="button" onClick={() => { setTimelineOpen(false); setPanelOpen(!panelOpen); }} aria-pressed={!panelOpen}><Maximize2 size={21} /><span>{panelOpen ? 'Full map' : 'Panel'}</span></button>
           </div>
           </div>

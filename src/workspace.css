@@ -1023,3 +1023,63 @@
 .light-thumbnail {
   background: repeating-linear-gradient(40deg, transparent 0 10px, #C8D3D7 11px 12px), #F1F3EF;
 }
+
+/* SIDEBAR-AWARE MAP CONTROLS: Leaflet adds a 10px margin to its zoom control. */
+.map-workspace .coordinate-readout,
+.map-workspace .workspace-map .leaflet-top.leaflet-left {
+  transition: left 180ms ease;
+}
+.map-workspace[data-navigation-open="false"] .coordinate-readout {
+  left: 16px;
+}
+.map-workspace[data-navigation-open="false"] .workspace-map .leaflet-top.leaflet-left {
+  left: 6px;
+  right: auto;
+}
+@media (max-width: 700px) {
+  .map-workspace[data-navigation-open="false"] .coordinate-readout {
+    left: 10px;
+  }
+  .map-workspace[data-navigation-open="false"] .workspace-map .leaflet-top.leaflet-left {
+    left: 0;
+    right: auto;
+    top: 52px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .map-workspace .coordinate-readout,
+  .map-workspace .workspace-map .leaflet-top.leaflet-left { transition: none; }
+}
+
+/* Observation-period label follows the collapsed sidebar too. */
+
+@media (max-width: 700px) {
+  
+  /* Keep zoom buttons below the coordinate display on a narrow screen. */
+  .map-workspace[data-navigation-open="false"] .workspace-map .leaflet-top.leaflet-left {
+    top: 52px;
+  }
+}
+
+/* Permanent observation-label position, independent of sidebar state. */
+.map-workspace .map-period-chip {
+  left: 16px;
+  max-width: calc(100% - 32px);
+}
+.map-workspace:not(.timeline-visible) .workspace-rail {
+  max-height: calc(100% - 112px);
+}
+@media (max-width: 700px) {
+  .map-workspace .map-period-chip {
+    left: 10px;
+    top: auto;
+    bottom: 80px;
+    max-width: calc(100% - 20px);
+  }
+  .map-workspace:not(.timeline-visible) .workspace-rail {
+    max-height: calc(100% - 128px);
+  }
+  .map-workspace:not(.timeline-visible) .wind-overlay-status {
+    bottom: 120px;
+  }
+}

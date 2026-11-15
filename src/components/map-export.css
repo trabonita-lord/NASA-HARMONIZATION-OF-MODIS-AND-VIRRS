@@ -1,0 +1,29 @@
+/* SHARE DIALOG: independent from the toolbar so it never gets clipped. */
+.map-share-dialog { width: min(520px, calc(100% - 24px)); max-height: calc(100dvh - 32px); margin: auto; padding: 22px; overflow-y: auto; border: 1px solid #435E72; border-radius: 13px; background: #122031; color: #E8F2FA; box-shadow: 0 20px 80px #0009; }
+.map-share-dialog::backdrop { background: rgba(3, 9, 18, .65); backdrop-filter: blur(4px); }
+.map-share-dialog header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.map-share-dialog header small { color: #9CB8CB; font-size: 9px; letter-spacing: 1.3px; }
+.map-share-dialog h2 { margin: 5px 0 0; font-size: 22px; }
+.map-share-dialog p { color: #B0C6D8; font-size: 12px; line-height: 1.65; overflow-wrap: anywhere; }
+.map-share-dialog label { display: block; margin: 16px 0 7px; color: #C9DDEB; font-size: 11px; }
+.map-share-link-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+.map-share-link-row input { width: 100%; min-width: 0; padding: 11px; border: 1px solid #456075; border-radius: 7px; background: #0C1827; color: #D4E9F5; font-size: 12px; }
+.map-share-dialog button, .map-share-options a { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 40px; padding: 9px 12px; border: 1px solid #476278; border-radius: 7px; background: #20364B; color: #E1EFF7; font: inherit; font-size: 12px; text-decoration: none; }
+.map-share-dialog header button { padding: 8px; }
+.map-share-dialog button:hover, .map-share-options a:hover { background: #35465B; border-color: #FFAA72; }
+.map-share-dialog button:disabled { opacity: .5; cursor: default; }
+.map-share-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; margin: 18px 0 10px; }
+.map-share-dialog .map-share-notice { padding: 10px; border: 1px solid #826143; border-radius: 7px; background: #33291F; color: #FFD2A8; }
+.map-share-dialog .map-share-hint, .map-share-dialog .map-share-status { font-size: 11px; }
+.map-share-status { min-height: 18px; color: #A8E7DA !important; }
+.map-share-webmail { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 14px; margin: 14px 0; font-size: 11px; color: #B0C6D8; }
+.map-share-webmail a { padding: 5px 0; color: #9EDDEA; text-decoration: underline; text-underline-offset: 3px; }
+.map-share-dialog :focus-visible { outline: 2px solid #FFBB85; outline-offset: 2px; }
+.map-export-status { position: fixed; z-index: 1600; bottom: max(90px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 12px; width: max-content; max-width: calc(100% - 24px); padding: 12px 15px; border: 1px solid #54748A; border-radius: 9px; background: #122A3F; color: #E0EFF6; font-size: 12px; line-height: 1.5; box-shadow: 0 6px 25px #0007; }
+.map-export-status span { min-width: 0; overflow-wrap: anywhere; }
+.map-export-status button { display: grid; place-items: center; flex-shrink: 0; border: 0; background: transparent; color: inherit; padding: 5px; }
+@media (max-width: 420px) {
+  .map-share-dialog { padding: 16px; }
+  .map-share-link-row { grid-template-columns: minmax(0, 1fr); }
+  .map-share-link-row button { justify-self: start; }
+}

@@ -4,9 +4,10 @@ import { Pane, useMapEvents } from 'react-leaflet';
 import { DomEvent } from 'leaflet';
 import { Crosshair, Search, Flag, MapPin, Trash2, X } from 'lucide-react';
 import LocationPin from './LocationPin';
+import LocationAutocomplete from './LocationAutocomplete';
 import {
-  SAVED_LOCATIONS_KEY, createLocation, isMapLocation, parseCoordinateQuery,
-  readSavedLocations, reverseLocation, searchLocations,
+  SAVED_LOCATIONS_KEY, createLocation, isMapLocation,
+  readSavedLocations, reverseLocation,
 } from '../lib/location-tools';
 import './location-tool.css';
 
@@ -16,10 +17,10 @@ export default function LocationTool({ open, onClose }) {
   const [selected, setSelected] = useState([]);
   const [activeKey, setActiveKey] = useState('');
   const [saved, setSaved] = useState(readSavedLocations);
-  const [query, setQuery] = useState('');
-  const [results, setResults] = useState([]);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState('');
+  const [searchResetKey, setSearchResetKey] = useState(0);
+  const [selectionVersion, setSelectionVersion] = useState(0);
   const panelRef = useRef(null);
   const requestRef = useRef(0);
   const controllerRef = useRef(null);
@@ -91,6 +92,8 @@ export default function LocationTool({ open, onClose }) {
     setNotice('');
     setSelected(previous => multiple ? [...previous.filter(item => item.key !== place.key), place] : [place]);
     setActiveKey(place.key);
+    // Reopen the card even when this same place is chosen again.
+    setSelectionVersion(value => value + 1);
     map.setView([place.latitude, place.longitude], Math.max(9, map.getZoom()));
     if (!findAddress) return;
 
@@ -139,28 +142,11 @@ export default function LocationTool({ open, onClose }) {
     }
   }
 
-  async function findLocation(event) {
-    event.preventDefault();
-    const text = query.trim();
-    if (!text) { setNotice('Enter a place name or latitude, longitude.'); return; }
-    const coordinates = parseCoordinateQuery(text);
-    if (coordinates) {
-      setResults([]);
-      selectLocation(createLocation(coordinates.latitude, coordinates.longitude));
-      return;
-    }
-    const request = beginRequest();
-    setResults([]);
-    try {
-      const places = await searchLocations(text, request.signal);
-      if (request.id !== requestRef.current) return;
-      setResults(places);
-      if (!places.length) setNotice('No matching Philippine location was found. Try coordinates.');
-    } catch (error) {
-      if (request.id === requestRef.current && error.name !== 'AbortError') setNotice('Place search is unavailable. Enter latitude, longitude or click the map instead.');
-    } finally {
-      finishRequest(request.id);
-    }
+  function changeTab(nextTab) {
+    cancelRequest();
+    setBusy(false);
+    setNotice('');
+    setTab(nextTab);
   }
 
   function saveLocation(place) {
@@ -190,7 +176,7 @@ export default function LocationTool({ open, onClose }) {
     setBusy(false);
     setSelected([]);
     setActiveKey('');
-    setResults([]);
+    setSearchResetKey(value => value + 1);
     setNotice('');
   }
 
@@ -205,24 +191,22 @@ export default function LocationTool({ open, onClose }) {
         <section className="location-tool-panel" ref={panelRef} aria-label="Location tool" onKeyDown={event => { if (event.key === 'Escape') closeTool(); }}>
           <header className="location-tool-header"><h2>LOCATION TOOL</h2><button type="button" aria-label="Close location tool" onClick={closeTool}><X size={19} /></button></header>
           <div className="location-tool-tabs" role="tablist" aria-label="Location methods">
-            <button type="button" role="tab" id="location-current-tab" aria-controls="location-tool-content" aria-selected={tab === 'current'} onClick={() => setTab('current')}><Crosshair /><span>Current<br />Location</span></button>
-            <button type="button" role="tab" id="location-find-tab" aria-controls="location-tool-content" aria-selected={tab === 'find'} onClick={() => setTab('find')}><Search /><span>Find<br />Location</span></button>
-            <button type="button" role="tab" id="location-saved-tab" aria-controls="location-tool-content" aria-selected={tab === 'saved'} onClick={() => setTab('saved')}><Flag /><span>Saved<br />Locations</span></button>
+            <button type="button" role="tab" id="location-current-tab" aria-controls="location-tool-content" aria-selected={tab === 'current'} onClick={() => changeTab('current')}><Crosshair /><span>Current<br />Location</span></button>
+            <button type="button" role="tab" id="location-find-tab" aria-controls="location-tool-content" aria-selected={tab === 'find'} onClick={() => changeTab('find')}><Search /><span>Find<br />Location</span></button>
+            <button type="button" role="tab" id="location-saved-tab" aria-controls="location-tool-content" aria-selected={tab === 'saved'} onClick={() => changeTab('saved')}><Flag /><span>Saved<br />Locations</span></button>
           </div>
           <div className="location-tool-body" id="location-tool-content" role="tabpanel" aria-labelledby={'location-' + tab + '-tab'}>
             {tab === 'current' && <><button type="button" className="location-action-button" disabled={busy} onClick={detectCurrentLocation}><MapPin size={18} /> {busy ? 'FINDING LOCATION...' : 'AUTO DETECT YOUR LOCATION'}</button><p>You can also determine location by directly clicking on the map.</p></>}
-            {tab === 'find' && <form className="location-find-form" onSubmit={findLocation}><label htmlFor="location-place-query">Place name or latitude, longitude</label><div><input id="location-place-query" value={query} onChange={event => setQuery(event.target.value)} placeholder="Nabua or 13.4051, 123.3725" /><button type="submit" disabled={busy}>{busy ? 'Finding...' : 'Find'}</button></div></form>}
-            {tab === 'find' && results.length > 0 && <ul className="location-place-list">{results.map(place => <li key={place.key}><button type="button" onClick={() => selectLocation(place, false)}><b>{place.title}</b><small>{place.address}</small></button></li>)}</ul>}
+            {tab === 'find' && <LocationAutocomplete key={searchResetKey} onSelect={selectLocation} />}
             {tab === 'saved' && <>{saved.length === 0 ? <p>No saved locations yet. Select a map point and click Save Location.</p> : <ul className="location-place-list">{saved.map(place => <li key={place.key}><button type="button" onClick={() => selectLocation(place, false)}><b>{place.title}</b><small>{place.latitude.toFixed(4)}, {place.longitude.toFixed(4)}</small></button><button type="button" className="location-remove-saved" aria-label={'Remove saved location ' + place.title} onClick={() => removeSavedLocation(place.key)}><Trash2 size={16} /></button></li>)}</ul>}<small className="location-tool-caption">Saved on this browser only.</small></>}
             {notice && <p className="location-tool-notice" role="status">{notice}</p>}
-            <small className="location-tool-caption">Place lookup: <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a></small>
+         
           </div>
-          <footer className="location-tool-footer"><label><input type="checkbox" checked={multiple} onChange={event => changeMultiple(event.target.checked)} /> Allow multiple location selection</label><button type="button" onClick={clearSelections}><Trash2 size={14} /> Clear All</button></footer>
         </section>
       )}
       {/* Keep address cards above the floating tool on smaller screens. */}
       <Pane name="location-cards" style={{ zIndex: 900 }} />
-      {selected.map(place => <LocationPin key={place.key} place={place} active={activeKey === place.key} saved={saved.some(item => item.key === place.key)} onSave={saveLocation} />)}
+      {selected.map(place => <LocationPin key={place.key} place={place} active={activeKey === place.key} selectionVersion={selectionVersion} saved={saved.some(item => item.key === place.key)} onSave={saveLocation} />)}
     </>
   );
 }

@@ -1,8 +1,3 @@
-/* ==================================================
-   EDIT COLORS HERE - THERMAL COMMAND
-   Change the hex values below, save, and refresh the preview.
-   var(--name) elsewhere means: use the color with that name here.
-   ================================================== */
 :root {
   --page-background: #0B0F19;       /* Main page and sidebar */
   --surface-background: #151C2C;    /* Cards, panels, popup */
@@ -12,52 +7,10 @@
   --text-secondary: #94A3B8;        /* Subtitles and descriptions */
   --accent-orange: #FF5722;         /* Total observations and active buttons */
   --accent-orange-end: #FF9800;     /* End of the orange gradient */
-  --sensor-modis: #FFB74D;          /* MODIS: amber */
-  --sensor-viirs: #00E5FF;          /* VIIRS: electric cyan */
+  --sensor-modis: #ffc400;          /* MODIS: amber */
+  --sensor-viirs: #ff0000;          /* VIIRS: electric cyan */
   --active-days-color: #A855F7;     /* Active days: purple */
 }
-
-/* OTHER PALETTES: Copy these values into :root above if you prefer.
-
-   NASA / SATELLITE TELEMETRY:
-   page-background: #0F172A; surface-background: #1E293B;
-   surface-border: #334155; hover-background: #27364C;
-   text-primary: #FFFFFF; text-secondary: #CBD5E1;
-   accent-orange: #F97316; accent-orange-end: #FB923C;
-   sensor-modis: #A855F7; sensor-viirs: #38BDF8;
-
-   LIGHT OBSERVATORY (also change html color-scheme to light):
-   page-background: #F1F5F9; surface-background: #FFFFFF;
-   surface-border: #CBD5E1; hover-background: #E2E8F0;
-   text-primary: #0F172A; text-secondary: #475569;
-   accent-orange: #EA580C; accent-orange-end: #F97316;
-   sensor-modis: #9333EA; sensor-viirs: #0284C7;
-   For light maps, remove the tile filter in DARK MAP below.
-*/
-
-/* APP.CSS EDIT GUIDE
-   Use Ctrl + F to find a section number or class name.
-
-   .sidebar-button         = sidebar button
-   .filter-controls button = previous / next month button
-   .summary-cards          = grid holding the small boxes
-   .summary-card           = one small box
-   .map-container          = map height and width
-   .calendar-day           = one calendar date button
-   .date-popup             = popup size and background
-   .pie-chart-panel        = pie chart section
-   .observation-table      = popup table
-
-   width / height = element size
-   padding        = space INSIDE a box
-   margin         = space OUTSIDE a box
-   gap            = space BETWEEN grid or flex items
-   color          = text color
-   background     = background color
-
-   Rules inside @media are overrides for smaller screens.
-   Keep grid-template-areas names matched with grid-area values.
-*/
 
 /* ==================================================
    1. PAGE DEFAULTS - page colors, fonts, and form controls
@@ -1598,11 +1551,11 @@ button.calendar-day:focus-visible {
   color: #0B0F19;
   font-weight: 700;
   cursor: pointer;
-  transition: transform 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .popup-content button:hover {
-  transform: translateY(-2px);
+  transform: scale(1.1);
 }
 
 @keyframes welcomeBackdropIn {

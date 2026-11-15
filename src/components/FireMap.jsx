@@ -12,7 +12,7 @@ import CoordinateGrid from './CoordinateGrid';
 import CoordinateReadout from './CoordinateReadout';
 import { FitObservationView } from './MapControls';
 
-export default function FireMap({ records, layers, basemap, mapReference, selectedLocation, onBasemapWarning, locationToolOpen, onCloseLocationTool, timelineActive = false }) {
+export default function FireMap({ records, layers, basemap, mapReference, selectedLocation, onBasemapWarning, locationToolOpen, onCloseLocationTool, timelineActive = false, sharedView = null }) {
   const theme = getThemeColors();
   const [failedBasemap, setFailedBasemap] = useState('');
   useEffect(function resetFallback() { setFailedBasemap(''); }, [basemap]);
@@ -45,8 +45,8 @@ export default function FireMap({ records, layers, basemap, mapReference, select
       <MapContainer
         ref={mapReference}
         attributionControl={false}
-        center={[12.5, 122.4]}
-        zoom={5.65}
+        center={sharedView?.center || [12.5, 122.4]}
+        zoom={sharedView?.zoom || 5.65}
         minZoom={5}
         maxZoom={18}
         maxBounds={PHILIPPINES_BOUNDS}
@@ -56,10 +56,10 @@ export default function FireMap({ records, layers, basemap, mapReference, select
         style={{ height: '100%', width: '100%' }}
         scrollWheelZoom={true}
       >
-        <TileLayer key={displayedBasemap} {...background} maxZoom={18} noWrap={true} eventHandlers={{ tileerror: handleTileError }} />
+        <TileLayer key={displayedBasemap} {...background} crossOrigin="anonymous" maxZoom={18} noWrap={true} eventHandlers={{ tileerror: handleTileError }} />
         <ProvinceBoundaries enabled={layers.boundaries !== false} />
         <ResizeMap />
-        <FitObservationView records={records} enabled={!timelineActive} />
+        <FitObservationView records={records} enabled={!timelineActive && !sharedView} />
         <WindLayer enabled={Boolean(layers.wind)} paused={timelineActive} hideStatus={locationToolOpen} />
         <LocationTool open={locationToolOpen} onClose={onCloseLocationTool} />
         {layers.grid && <CoordinateGrid />}

@@ -1,0 +1,205 @@
+/* RESPONSIVE LAYOUT
+   Loaded last so device sizes are easy to edit in one place.
+   Tablet: 1050px. Phone: 700px. Small phone: 380px.
+   These rules only arrange the interface; data and features stay unchanged. */
+
+/* ALL SCREENS: let nested grids shrink and keep scrolling inside panels. */
+.workspace-brand img { width: 120px; height: 44px; }
+/* Six map tools stay on one row; small screens can scroll the toolbar. */
+.workspace-toolbar { max-width: calc(100% - 24px); overflow-x: auto; scrollbar-width: thin; }
+.workspace-toolbar button { flex-shrink: 0; }
+.workspace-toolbar button:disabled { opacity: .5; cursor: wait; }
+.workspace-header-actions { min-width: 0; flex-shrink: 0; }
+.workspace-panel-scroll, .dashboard-page, .location-tool-body {
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+.workspace-panel-scroll > *, .workspace-page-content, .dashboard-page > *,
+.dashboard-chart-grid > *, .dashboard-shortcuts button > span { min-width: 0; }
+.workspace-panel-scroll, .dashboard-card, .location-tool-body { overflow-wrap: anywhere; }
+.dashboard-chart-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.dashboard-table-scroll { max-width: 100%; }
+.workspace-warning, .workspace-error {
+  left: 150px;
+  right: 16px;
+  width: auto;
+  max-width: 450px;
+}
+.workspace-warning > span, .workspace-error > span { min-width: 0; overflow-wrap: anywhere; }
+.popup { padding: max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom)); }
+.popup-content { max-height: calc(100dvh - 32px); }
+.date-popup { max-height: calc(100dvh - 32px); }
+
+/* TABLETS / SMALL LAPTOPS: stack charts and give filter fields flexible widths. */
+@media (max-width: 1050px) {
+  .dashboard-chart-grid { grid-template-columns: minmax(0, 1fr); }
+  .dashboard-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dashboard-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dashboard-card-heading, .dashboard-selection-heading { flex-wrap: wrap; }
+  .workspace-header-caption, .workspace-header-divider { display: none; }
+  .workspace-warning, .workspace-error { left: 150px; right: 16px; width: auto; }
+  .timeline-controls { flex-wrap: wrap; overflow-x: visible; }
+  .map-timeline { grid-template-columns: minmax(0, 1fr); }
+  .timeline-heading, .timeline-controls { grid-column: 1 / -1; }
+}
+
+@media (min-width: 701px) and (max-width: 850px) {
+  .coordinate-readout { gap: 6px; padding: 8px; font-size: 9px; }
+  .coordinate-readout small { font-size: 8px; }
+  .coordinate-readout svg { width: 14px; height: 14px; }
+}
+
+/* PHONES: a scrollable horizontal navigation strip leaves room for content.
+   Map controls sit below it. The menu button still hides/shows navigation. */
+@media (max-width: 700px) {
+  .firms-workspace { --header-height: 56px; }
+  .workspace-topbar { gap: 8px; padding: 0 10px; }
+  .workspace-brand img { width: 104px; height: 38px; }
+  .header-icon-button { min-width: 40px; min-height: 40px; }
+  .workspace-rail,
+  .map-workspace:not(.timeline-visible) .workspace-rail,
+  .timeline-visible .workspace-rail {
+    top: 8px; left: 10px; right: 10px;
+    width: auto; height: 58px; max-height: 58px;
+    display: flex; gap: 4px; padding: 4px;
+    overflow-x: auto; overflow-y: hidden;
+    scrollbar-width: thin; overscroll-behavior-x: contain;
+  }
+  .workspace-rail .rail-button { flex: 0 0 60px; width: 60px; min-height: 44px; padding: 4px 2px; }
+  .rail-button span { font-size: 8px; }
+  .rail-button-active::before { top: auto; bottom: 0; left: 10px; right: 10px; width: auto; height: 2px; }
+  .rail-separator { flex: 0 0 1px; height: auto; margin: 5px 2px; }
+
+  /* Same coordinate/zoom positions whether navigation is visible or hidden. */
+  .map-workspace { --map-control-top: 76px; }
+  .map-workspace[data-navigation-open="false"] { --map-control-top: 10px; }
+  .map-workspace .coordinate-readout,
+  .map-workspace[data-navigation-open="false"] .coordinate-readout {
+    top: var(--map-control-top); left: 10px; right: 10px;
+    gap: 10px; padding: 8px; font-size: 10px;
+    min-width: 0; flex-wrap: wrap;
+  }
+  .map-workspace .workspace-map .leaflet-top.leaflet-left,
+  .map-workspace[data-navigation-open="false"] .workspace-map .leaflet-top.leaflet-left {
+    top: calc(var(--map-control-top) + 32px); left: 0; right: auto;
+  }
+  .map-workspace .workspace-panel {
+    top: calc(var(--map-control-top) + 42px);
+    bottom: calc(120px + env(safe-area-inset-bottom));
+    left: 54px; right: 10px;
+    width: auto; max-width: none; height: auto; max-height: none;
+  }
+  .workspace-panel-header { padding: 10px; gap: 6px; }
+  .workspace-panel-header h1 { font-size: 15px; }
+  .workspace-panel-scroll { padding: 10px; }
+  .workspace-panel .calendar-grid { gap: 2px; }
+  .workspace-panel .calendar-day { padding: 2px; min-width: 0; }
+  .map-workspace .reopen-panel-button { top: calc(var(--map-control-top) + 42px); bottom: auto; right: 10px; }
+  /* The location tool's close button must stay accessible above its dropdown. */
+  .map-workspace:has(.location-tool-panel) .reopen-panel-button { display: none; }
+
+  /* Location panel keeps the zoom buttons accessible on its left. */
+  .map-workspace .location-tool-panel {
+    top: calc(var(--map-control-top) + 42px); left: 54px; right: 10px;
+    width: auto; max-height: calc(100% - var(--map-control-top) - 122px - env(safe-area-inset-bottom));
+  }
+  .location-tool-tabs button { flex-direction: column; text-align: center; font-size: 10px; }
+  .location-tool-tabs svg { width: 18px; height: 18px; }
+  .location-tool-footer label { min-width: 0; flex: 1 1 140px; }
+  .location-place-list b, .location-tool-popup p { overflow-wrap: anywhere; }
+  .workspace-map .leaflet-popup-content { max-width: calc(100vw - 70px); }
+
+  .workspace-toolbar { bottom: calc(10px + env(safe-area-inset-bottom)); max-width: calc(100% - 20px); }
+  .workspace-toolbar button { width: 44px; height: 48px; flex-shrink: 0; }
+  .map-workspace .map-period-chip {
+    left: 10px; top: auto; bottom: calc(78px + env(safe-area-inset-bottom));
+    max-width: calc(100% - 20px); overflow-wrap: anywhere;
+  }
+  .map-workspace:not(.timeline-visible) .wind-overlay-status {
+    left: 54px; bottom: calc(116px + env(safe-area-inset-bottom));
+    width: min(250px, calc(100% - 64px)); max-height: 110px; overflow-y: auto;
+  }
+  .map-workspace .workspace-warning, .map-workspace .workspace-error {
+    top: calc(var(--map-control-top) + 42px); left: 54px; right: 10px;
+    width: auto; max-width: none; max-height: 110px; overflow-y: auto;
+  }
+  .workspace-map .boundary-map-notice { top: calc(var(--map-control-top) + 92px); }
+
+  /* Timeline scrolls internally on short screens; navigation remains usable. */
+  .timeline-visible .workspace-bottom-controls {
+    left: 10px; right: 10px; bottom: calc(10px + env(safe-area-inset-bottom));
+    max-height: calc(100% - var(--map-control-top) - 42px - env(safe-area-inset-bottom));
+  }
+  .timeline-visible .workspace-toolbar { bottom: auto; }
+  .map-timeline { min-width: 0; flex: 0 1 auto; }
+  .timeline-controls { justify-content: flex-start; flex-wrap: wrap; gap: 8px; }
+  .timeline-title { flex-wrap: wrap; }
+  .timeline-heading { min-width: 0; }
+  .timeline-months { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .timeline-months button { min-height: 28px; font-size: 9px; }
+  .timeline-days button { min-height: 34px; }
+  .timeline-icon-button { width: 32px; height: 32px; }
+  .timeline-play-button { min-height: 32px; }
+  .timeline-date-label input, .timeline-window-label select { min-height: 32px; }
+  .timeline-range { height: 20px; flex-shrink: 0; }
+
+  /* Dashboard uses the full phone width below the horizontal navigation. */
+  .dashboard-page { padding: 84px 12px 24px; gap: 14px; }
+  .dashboard-navigation-hidden .dashboard-page { padding: 18px 12px 24px; }
+  .dashboard-filters { grid-template-columns: minmax(0, 1fr); }
+  .dashboard-shortcuts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dashboard-shortcuts button { gap: 8px; padding: 10px; }
+  .dashboard-shortcuts button > svg:last-child { display: none; }
+  .dashboard-metric { min-width: 0; overflow-wrap: anywhere; }
+  .dashboard-reference-card { grid-template-columns: minmax(0, 1fr); }
+  .dashboard-chart { height: 250px; }
+  .popup-content { padding: 20px; }
+  .popup-content h1 { font-size: 23px; }
+}
+
+/* SMALL PHONES: retain readable cards, fields, and scrollable tables. */
+@media (max-width: 380px) {
+  .dashboard-shortcuts { grid-template-columns: minmax(0, 1fr); }
+  .dashboard-metric strong { font-size: 21px; }
+  .workspace-panel .summary-card { padding: 8px; }
+  .workspace-panel .summary-card strong { font-size: 21px; }
+  .location-tool-tabs button { font-size: 9px; }
+  .location-find-form > div { flex-wrap: wrap; }
+  .location-find-form button { min-height: 34px; }
+  .coordinate-readout small { font-size: 7px; }
+}
+
+/* SHORT LANDSCAPE WINDOWS: reserve space for controls and scroll long panels. */
+@media (min-width: 480px) and (max-width: 700px) and (max-height: 500px) {
+  .firms-workspace { --header-height: 48px; }
+  .map-workspace { --map-control-top: 62px; }
+  .workspace-rail,
+  .map-workspace:not(.timeline-visible) .workspace-rail,
+  .timeline-visible .workspace-rail { top: 4px; height: 48px; max-height: 48px; }
+  .workspace-rail .rail-button { min-height: 36px; gap: 2px; }
+  .rail-button svg { width: 16px; height: 16px; }
+  .map-workspace .workspace-panel {
+    top: calc(var(--map-control-top) + 36px); bottom: 76px;
+  }
+  .workspace-panel-header { padding: 7px 10px; }
+  .workspace-panel-header .section-caption { display: none; }
+  .map-workspace .map-period-chip { bottom: 8px; max-width: calc(50% - 170px); padding: 5px; }
+  .map-workspace .location-tool-panel {
+    top: calc(var(--map-control-top) + 36px);
+    max-height: calc(100% - var(--map-control-top) - 112px);
+  }
+  .dashboard-page { padding-top: 66px; }
+}
+@media (min-width: 701px) and (max-height: 500px) {
+  .firms-workspace { --header-height: 50px; }
+  .workspace-brand img { height: 36px; }
+  .workspace-rail { top: 8px; bottom: 82px; max-height: calc(100% - 90px); }
+  .rail-button { min-height: 44px; padding: 5px 2px; }
+  .workspace-panel { top: 8px; bottom: 78px; }
+  .workspace-panel-header { padding: 9px 12px; }
+  .workspace-panel-scroll { padding: 12px; }
+  .location-tool-panel { top: 64px; max-height: calc(100% - 142px); }
+  .timeline-visible .workspace-bottom-controls { max-height: calc(100% - 80px); bottom: 10px; }
+  .timeline-controls { flex-wrap: wrap; }
+  .dashboard-chart { height: 230px; }
+}
